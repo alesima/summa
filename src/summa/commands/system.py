@@ -67,6 +67,30 @@ def register(app: typer.Typer) -> None:
         from .transactions import tx_import
         tx_import(file, account=account, dry_run=dry_run, categorize=categorize)
 
+    @app.command("usage")
+    def usage_cmd(
+        price_input: float = typer.Option(0.0, "--price-input", help="USD per 1M input tokens (for cost estimate)."),
+        price_output: float = typer.Option(0.0, "--price-output", help="USD per 1M output tokens (for cost estimate)."),
+    ):
+        """Show AI token usage and optional cost estimate."""
+        db.init()
+        with db.db() as conn:
+            rows = conn.execute(
+                "SELECT model, COALESCE(SUM(prompt_tokens),0) AS p, COALESCE(SUM(completion_tokens),0) AS c, COALESCE(SUM(total_tokens),0) AS t, COUNT(*) AS n FROM token_usage GROUP BY model"
+            ).fetchall()
+            tot = conn.execute(
+                "SELECT COALESCE(SUM(prompt_tokens),0), COALESCE(SUM(completion_tokens),0), COALESCE(SUM(total_tokens),0), COUNT(*) FROM token_usage"
+            ).fetchone()
+        from rich.table import Table
+        t = Table("Model", "Calls", "Prompt", "Completion", "Total")
+        for r in rows:
+            t.add_row(r["model"], str(r["n"]), str(r["p"]), str(r["c"]), str(r["t"]))
+        console.print(t if rows else "No usage recorded.")
+        console.print(f"Totals: prompt={tot[0]} completion={tot[1]} total={tot[2]} calls={tot[3]}")
+        if price_input or price_output:
+            cost = (tot[0] / 1e6) * price_input + (tot[1] / 1e6) * price_output
+            console.print(f"Estimated cost: ${cost:.4f} USD")
+
     @app.command("dashboard")
     def dashboard_cmd():
         """Launch the interactive TUI dashboard."""

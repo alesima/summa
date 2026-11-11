@@ -90,6 +90,21 @@ def chat(system: str, user: str, *, json_mode: bool = False) -> str:
         else:
             raise
     choice = resp.choices[0].message
+    # record token usage (best-effort)
+    try:
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            from . import db
+            with db.db() as conn:
+                conn.execute(
+                    "INSERT INTO token_usage(model, prompt_tokens, completion_tokens, total_tokens) VALUES (?,?,?,?)",
+                    (model,
+                     getattr(usage, "prompt_tokens", 0) or 0,
+                     getattr(usage, "completion_tokens", 0) or 0,
+                     getattr(usage, "total_tokens", 0) or 0),
+                )
+    except Exception:
+        pass
     return (choice.content if getattr(choice, "content", None) else "") or ""
 
 
