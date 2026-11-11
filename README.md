@@ -34,14 +34,14 @@ uv run summa export out.csv
 uv run summa dashboard
 ```
 
-## AI setup (OpenAI o4-mini)
+## AI setup (OpenAI)
 
 1. Create a key at https://platform.openai.com/api-keys
 2. Save it in `~/.summa/.env` (or as an environment variable):
 
 ```
 OPENAI_API_KEY=sk-...
-SUMMA_AI_MODEL=o4-mini
+SUMMA_AI_MODEL=gpt-5.6-terra
 ```
 
 Optional: use another provider/model:

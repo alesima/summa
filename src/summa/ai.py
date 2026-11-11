@@ -46,7 +46,7 @@ def resolve_model(provider: str) -> str:
         return m
     if provider == "anthropic":
         return "claude-haiku-4-5-20251001"
-    return "o4-mini"
+    return "gpt-5.6-terra"
 
 
 def _client():
@@ -75,10 +75,18 @@ def chat(system: str, user: str, *, json_mode: bool = False) -> str:
     try:
         resp = client.chat.completions.create(**kwargs)
     except Exception as e:
+        msg = str(e)
+        low = msg.lower()
         # Some providers (e.g. Ollama) do not support response_format.
-        if json_mode and "response_format" in str(e).lower():
+        if json_mode and "response_format" in low:
             kwargs.pop("response_format", None)
             resp = client.chat.completions.create(**kwargs)
+        elif "404" in msg or "deprecated" in low or "does not exist" in low or "model_not_found" in low:
+            raise RuntimeError(
+                f"Model '{model}' is not available or deprecated. "
+                "Update SUMMA_AI_MODEL (e.g. gpt-5.6-terra) or your provider's current model. "
+                f"Original error: {msg}"
+            )
         else:
             raise
     choice = resp.choices[0].message

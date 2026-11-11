@@ -21,7 +21,7 @@ def test_resolve_provider_openai(monkeypatch):
 
 def test_resolve_model_default(monkeypatch):
     monkeypatch.delenv("SUMMA_AI_MODEL", raising=False)
-    assert ai.resolve_model("openai") == "o4-mini"
+    assert ai.resolve_model("openai") == "gpt-5.6-terra"
 
 
 def test_categorize_transactions_mock():
