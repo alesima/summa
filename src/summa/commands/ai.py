@@ -73,6 +73,7 @@ def register(app: typer.Typer) -> None:
                 import sys
                 full = ""
                 # preloader while waiting for first token
+                console.print()
                 with Status("[bold cyan]Thinking...[/bold cyan]", console=console, spinner="dots") as status:
                     started = False
                     for chunk in ai.chat_stream(system, history):
@@ -84,7 +85,8 @@ def register(app: typer.Typer) -> None:
                         sys.stdout.flush()
                     if not started:
                         status.stop()
-                console.print()  # newline after stream
+                console.print()
+                console.print()
                 history.append({"role": "assistant", "content": full})
             except Exception as e:
                 console.print(f"\n[red]Error:[/red] {e}")
