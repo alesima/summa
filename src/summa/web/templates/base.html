@@ -1,33 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}summa{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
   <style>
-    body { background: #0f172a; color: #e2e8f0; }
-    .card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
-    .btn { background: #22c55e; color: #0f172a; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; }
-    .btn:hover { background: #16a34a; }
-    .inp { background: #0f172a; border: 1px solid #475569; border-radius: 0.5rem; padding: 0.5rem; color: #e2e8f0; width: 100%; }
-    table { width: 100%; }
-    th, td { padding: 0.5rem; }
-    th { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; }
-    tr { border-bottom: 1px solid #334155; }
+    :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --accent: #16a34a; }
+    .dark { --bg: #0b1220; --card: #111827; --text: #e5e7eb; --muted: #94a3b8; --border: #1f2937; --accent: #22c55e; }
+    body { background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; }
+    .btn { background: var(--accent); color: #fff; padding: 0.5rem 1.25rem; border-radius: 0.625rem; font-weight: 600; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    .inp { background: var(--bg); border: 1px solid var(--border); border-radius: 0.625rem; padding: 0.5rem 0.75rem; color: var(--text); width: 100%; }
+    .muted { color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.625rem 0.75rem; }
+    th { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    tr { border-bottom: 1px solid var(--border); }
+    tr:last-child { border-bottom: none; }
+    .nav-link { color: var(--muted); transition: color 0.2s; }
+    .nav-link:hover { color: var(--accent); }
   </style>
 </head>
-<body class="min-h-screen">
-  <nav class="bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center gap-6">
-    <span class="text-xl font-bold text-green-400">summa</span>
-    <a href="/" class="hover:text-green-400">Dashboard</a>
-    <a href="/transactions" class="hover:text-green-400">Transactions</a>
-    <a href="/budgets" class="hover:text-green-400">Budgets</a>
-    <a href="/import" class="hover:text-green-400">Import</a>
-    <a href="/ask" class="hover:text-green-400">Ask AI</a>
+<body class="min-h-screen antialiased">
+  <nav class="sticky top-0 z-10 backdrop-blur border-b" style="background: color-mix(in srgb, var(--card) 80%, transparent); border-color: var(--border);">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
+        <div class="flex gap-5 text-sm">
+          <a href="/" class="nav-link">Dashboard</a>
+          <a href="/transactions" class="nav-link">Transactions</a>
+          <a href="/budgets" class="nav-link">Budgets</a>
+          <a href="/import" class="nav-link">Import</a>
+          <a href="/ask" class="nav-link">Ask AI</a>
+        </div>
+      </div>
+      <button onclick="toggleTheme()" class="text-xl" aria-label="Toggle theme">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </div>
   </nav>
-  <main class="p-6 max-w-6xl mx-auto">
+  <main class="max-w-6xl mx-auto px-6 py-8">
     {% block content %}{% endblock %}
   </main>
+  <script>
+    const html = document.documentElement;
+    const icon = document.getElementById('theme-icon');
+    function applyTheme(t) {
+      if (t === 'dark') { html.classList.add('dark'); icon.textContent = '☀️'; }
+      else { html.classList.remove('dark'); icon.textContent = '🌙'; }
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(html.classList.contains('dark') ? 'light' : 'dark');
+    }
+    applyTheme(localStorage.getItem('theme') || 'dark');
+  </script>
 </body>
 </html>
