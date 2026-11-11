@@ -36,6 +36,7 @@
 ## budget
 - `budget set <category> <month> <amount>`
 - `budget show <month>`
+- `budget plan <salary> [--month] [--savings] [--apply] [--history]`
 
 ## report
 - `report summary [--start] [--end]`
