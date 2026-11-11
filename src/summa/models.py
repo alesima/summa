@@ -48,3 +48,14 @@ def to_cents(value: float | str) -> int:
 def from_cents(cents: int) -> str:
     from decimal import Decimal
     return f"{Decimal(cents) / 100:.2f}"
+
+
+def fmt_date(iso: str) -> str:
+    """Format an ISO date (YYYY-MM-DD) as DD/MM/YYYY for display."""
+    if not iso:
+        return iso
+    try:
+        from datetime import datetime
+        return datetime.strptime(str(iso), "%Y-%m-%d").strftime("%d/%m/%Y")
+    except ValueError:
+        return str(iso)

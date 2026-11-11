@@ -4,7 +4,7 @@
   {% for t in rows %}
     <tr>
       <td>{{ t.id }}</td>
-      <td>{{ t.date }}</td>
+      <td>{{ t.date|datefmt }}</td>
       <td>{{ t.account_name }}</td>
       <td>{{ t.description }}</td>
       <td>{{ t.category_name or '-' }}</td>

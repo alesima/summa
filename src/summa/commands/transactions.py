@@ -81,7 +81,7 @@ def register(app: typer.Typer) -> None:
         for r in rows:
             val = r["amount_cents"] / 100.0
             color = "green" if r["amount_cents"] > 0 else "red"
-            t.add_row(str(r["id"]), r["date"], r["account_name"], r["description"],
+            t.add_row(str(r["id"]), models.fmt_date(r["date"]), r["account_name"], r["description"],
                       r["category_name"] or "-", f"[{color}]{val:.2f}[/{color}]")
         console.print(t if rows else "No transactions.")
 
@@ -122,7 +122,7 @@ def register(app: typer.Typer) -> None:
         console.print(f"[cyan]{len(parsed)} transactions found.[/cyan]")
         t = Table("Date", "Description", "Amount")
         for p in parsed[:20]:
-            t.add_row(p["date"], p["description"][:40], f"{p['amount']:.2f}")
+            t.add_row(models.fmt_date(p["date"]), p["description"][:40], f"{p['amount']:.2f}")
         if len(parsed) > 20:
             console.print(f"... and {len(parsed)-20} more")
         console.print(t)

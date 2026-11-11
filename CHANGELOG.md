@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Dates rendered as DD/MM/YYYY (instead of SQL ISO) in CLI and web UI.
+
 ### Added
 - Web UI now supports HTMX for partial updates (add transaction without full reload).
 

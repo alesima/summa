@@ -68,7 +68,7 @@
         <tbody>
         {% for t in txns %}
           <tr>
-            <td class="text-sm">{{ t.date }}</td>
+            <td class="text-sm">{{ t.date|datefmt }}</td>
             <td class="text-sm">{{ t.description[:28] }}</td>
             <td class="text-sm muted">{{ t.category_name or '-' }}</td>
             <td class="text-right text-sm font-mono {% if t.amount_cents > 0 %}text-green-500{% else %}text-red-500{% endif %}">{{ "%.2f"|format(t.amount_cents/100) }}</td>

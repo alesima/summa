@@ -18,6 +18,19 @@ from ..i18n import get_language, language_name
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+
+def _datefmt(value):
+    if not value:
+        return value
+    try:
+        from datetime import datetime
+        return datetime.strptime(str(value), "%Y-%m-%d").strftime("%d/%m/%Y")
+    except Exception:
+        return value
+
+
+templates.env.filters["datefmt"] = _datefmt
+
 app = FastAPI(title="summa", description="Terminal personal finance tracker with AI — Web UI")
 
 
