@@ -19,7 +19,7 @@
   <h2 class="font-bold mb-3">{{ t('add_account') }}</h2>
   <form method="post" action="/accounts/add" class="space-y-3">
     <input class="inp" name="name" placeholder="Name" required>
-    <select class="inp" name="type"><option>checking</option><option>savings</option><option>credit</option><option>cash</option><option>investment</option></select>
+    <select class="inp" name="type"><option value="checking">{{ t("type_checking") }}</option><option value="savings">{{ t("type_savings") }}</option><option value="credit">{{ t("type_credit") }}</option><option value="cash">{{ t("type_cash") }}</option><option value="investment">{{ t("type_investment") }}</option></select>
     <input class="inp" name="currency" value="BRL" placeholder="Currency">
     <button class="btn" type="submit">{{ t('add') }}</button>
   </form>

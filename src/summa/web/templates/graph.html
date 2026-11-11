@@ -7,15 +7,15 @@
 <div class="grid grid-cols-3 gap-3 mb-6">
   <div class="card p-4 text-center">
     <div class="text-2xl font-bold" style="color: var(--accent);">{{ rows|length }}</div>
-    <div class="text-xs muted">Triples</div>
+    <div class="text-xs muted">{{ t("triples") }}</div>
   </div>
   <div class="card p-4 text-center">
     <div class="text-2xl font-bold" style="color: var(--accent);">{{ rows|map(attribute='subject')|unique|list|length }}</div>
-    <div class="text-xs muted">Subjects</div>
+    <div class="text-xs muted">{{ t("subjects") }}</div>
   </div>
   <div class="card p-4 text-center">
     <div class="text-2xl font-bold" style="color: var(--accent);">{{ rows|map(attribute='predicate')|unique|list|length }}</div>
-    <div class="text-xs muted">Predicates</div>
+    <div class="text-xs muted">{{ t("predicates") }}</div>
   </div>
 </div>
 
@@ -68,7 +68,7 @@
 
 <!-- Add triple manually -->
 <div class="card p-6 mt-6 max-w-2xl">
-  <h2 class="font-bold mb-3">Add triple</h2>
+  <h2 class="font-bold mb-3">{{ t("add_triple") }}</h2>
   <form method="post" action="/graph/add" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
     <input class="inp" name="subject" placeholder="{{ t('subject') }}" required>
     <input class="inp" name="predicate" placeholder="{{ t('predicate') }}" required>
