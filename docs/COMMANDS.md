@@ -9,6 +9,7 @@
 | `export <path>` | Export transactions to CSV. |
 | `import <file>` | Import a bank statement (CSV/OFX/PDF). |
 | `dashboard` | Launch the TUI dashboard. |
+| `health` | Check system health. |
 | `web` | Launch the web interface. |
 | `ask "<question>"` | Ask a natural-language question (AI). |
 | `chat` | Interactive chat (REPL). |

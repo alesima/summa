@@ -79,7 +79,7 @@
         <form action="/search" method="get" class="flex-1 max-w-md">
           <div class="relative">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style="color: var(--muted);"></i>
-            <input name="q" class="inp pl-9 py-2 text-sm" placeholder="Search transactions..." value="{{ q or '' }}">
+            <input name="q" class="inp pl-9 py-2 text-sm" placeholder="{{ t('search_transactions') }}" value="{{ q or '' }}">
           </div>
         </form>
         <div class="flex items-center gap-3 shrink-0 ml-auto">

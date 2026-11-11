@@ -107,6 +107,18 @@ make lint      # compile check
 make clean     # remove artifacts
 ```
 
+## 9.5. Web Interface
+
+`summa web` launches a FastAPI + Jinja2 + Tailwind (CDN) app.
+
+- Pages: Dashboard, Transactions, Budgets, Import, Ask, Plan, Review, Accounts, Categories, Memory, Graph, FX, Usage, Chart, Search, Health.
+- HTMX for partial updates (e.g. add transaction).
+- i18n: en, pt-BR, pt-PT, es, fr, de, it (selector in navbar).
+- Light/dark theme toggle (persisted in localStorage).
+- Date picker (flatpickr) with browser-locale formatting.
+- Markdown rendering in AI answers (marked.js).
+- Favicon + solid icons (Font Awesome).
+
 ## 10. Extension Points
 
 - Add a new command: create module in `commands/`, implement `register(app)`,
