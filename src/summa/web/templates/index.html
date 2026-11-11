@@ -98,35 +98,9 @@
   </div>
 </div>
 
-<!-- {{ t("add_transaction") }} -->
-<div class="card p-5">
-  <h2 class="font-bold mb-4">{{ t("add_transaction") }}</h2>
-  <form hx-post="/transactions/add" hx-target="#tx-table" hx-swap="innerHTML" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
-    <div>
-      <label class="text-xs muted block mb-1">{{ t('amount') }}</label>
-      <input class="inp" name="amount" type="number" step="0.01" placeholder="0.00" required>
-    </div>
-    <div class="md:col-span-2">
-      <label class="text-xs muted block mb-1">{{ t('description') }}</label>
-      <input class="inp" name="description" placeholder="{{ t('description') }}" required>
-    </div>
-    <div>
-      <label class="text-xs muted block mb-1">{{ t('account') }}</label>
-      <select class="inp" name="account">
-        {% for a in accounts %}<option value="{{ a.name }}">{{ a.name }}</option>{% endfor %}
-      </select>
-    </div>
-    <div>
-      <label class="text-xs muted block mb-1">{{ t('category') }}</label>
-      <select class="inp" name="category">
-        <option value="">—</option>
-        {% for c in cats %}<option value="{{ c.name }}">{{ c.name }}</option>{% endfor %}
-      </select>
-    </div>
-    <div class="flex items-end gap-2">
-      <label class="flex items-center gap-2 text-sm muted"><input type="checkbox" name="income" value="true"> {{ t("income") }}</label>
-      <button class="btn" type="submit">{{ t("add") }}</button>
-    </div>
-  </form>
+<!-- Add transaction button + modal -->
+<div class="mb-6">
+  <button onclick="openModal('add-tx')" class="btn"><i class="fas fa-plus mr-2"></i>{{ t('add_transaction') }}</button>
 </div>
+
 {% endblock %}

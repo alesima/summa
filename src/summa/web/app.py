@@ -24,6 +24,14 @@ templates.env.globals["t"] = _t
 templates.env.globals["available_languages"] = available_languages
 
 
+def _base_context(request):
+    db.init()
+    return {"accounts": repo.list_accounts(), "cats": repo.list_categories()}
+
+
+templates.context_processors.append(_base_context)
+
+
 def _datefmt(value):
     if not value:
         return value
