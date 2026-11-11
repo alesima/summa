@@ -47,14 +47,21 @@
 <body class="min-h-screen antialiased flex">
   <!-- Sidebar -->
   <aside class="w-60 shrink-0 border-r hidden md:block" style="background: var(--sidebar); border-color: var(--border);">
-    <div class="p-5 flex items-center justify-between">
+    <div class="p-5 flex items-center justify-between gap-3">
       <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
-      <select onchange="window.location='/set-lang?lang='+this.value" class="inp w-auto text-sm" style="width:auto;">
-        {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
-      </select>
-      <button onclick="toggleTheme()" class="text-lg" aria-label="Toggle theme">
-        <i id="theme-icon" class="fas fa-sun"></i>
-      </button>
+      <div class="flex items-center gap-2">
+        <select onchange="window.location='/set-lang?lang='+this.value" class="inp text-xs" style="width:auto; padding:0.25rem 1.8rem 0.25rem 0.5rem;">
+          {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
+        </select>
+        <button onclick="toggleTheme()" aria-label="Toggle theme"
+          class="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none shrink-0"
+          style="background: var(--border);">
+          <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-[10px]"
+                style="background: var(--accent); color: #fff;">
+            <i id="theme-icon" class="fas fa-sun"></i>
+          </span>
+        </button>
+      </div>
     </div>
     <nav class="px-3 pb-6">
       <div class="section-title">{{ t("overview") }}</div>
@@ -81,7 +88,14 @@
   <!-- Mobile header -->
   <div class="md:hidden fixed top-0 left-0 right-0 z-20 border-b px-4 py-3 flex items-center justify-between" style="background: var(--card); border-color: var(--border);">
     <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
-    <button onclick="toggleTheme()" class="text-lg"><i id="theme-icon-m" class="fas fa-sun"></i></button>
+    <button onclick="toggleTheme()" aria-label="Toggle theme"
+      class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
+      style="background: var(--border);">
+      <span id="theme-knob-m" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-xs"
+            style="background: var(--accent); color: #fff;">
+        <i id="theme-icon-m" class="fas fa-sun"></i>
+      </span>
+    </button>
   </div>
   <main class="flex-1 min-w-0 p-6 md:p-8 mt-14 md:mt-0">
     <div class="max-w-5xl mx-auto">
@@ -91,8 +105,8 @@
   <script>
     const html = document.documentElement;
     function applyTheme(t) {
-      if (t === 'dark') { html.classList.add('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-moon'); e.classList.add('fa-sun'); }); }
-      else { html.classList.remove('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-sun'); e.classList.add('fa-moon'); }); }
+      if (t === 'dark') { html.classList.add('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-moon'); e.classList.add('fa-sun'); }); document.querySelectorAll('#theme-knob, #theme-knob-m').forEach(e=>{ e.style.transform='translateX(24px)'; }); }
+      else { html.classList.remove('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-sun'); e.classList.add('fa-moon'); }); document.querySelectorAll('#theme-knob, #theme-knob-m').forEach(e=>{ e.style.transform='translateX(0)'; }); }
       localStorage.setItem('theme', t);
     }
     function toggleTheme() { applyTheme(html.classList.contains('dark') ? 'light' : 'dark'); }
