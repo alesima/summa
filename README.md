@@ -97,6 +97,12 @@ summa --help
 - `src/summa/tui.py` — Textual dashboard
 - `tests/` — test suite
 
+## Documentation
+
+- [Specification](docs/SPEC.md)
+- [Command reference](docs/COMMANDS.md)
+- [Data model](docs/DATA_MODEL.md)
+
 ## Development
 
 ```bash
