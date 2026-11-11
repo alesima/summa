@@ -148,7 +148,8 @@ def register(app: typer.Typer) -> None:
             return
         cats = list(dict.fromkeys([c["name"] for c in repo.list_categories()]))
         try:
-            suggestions = ai.categorize_transactions(txns, cats)
+            from ..services.decision_service import categorize as decide
+            suggestions = decide(txns, cats)
         except Exception as e:
             console.print(f"[red]AI error:[/red] {e}")
             raise typer.Exit(1)

@@ -66,7 +66,8 @@ def import_statement(file, account_name: Optional[str] = None, *,
         if txns:
             cats = list(dict.fromkeys([c["name"] for c in repo.list_categories()]))
             try:
-                suggestions = ai.categorize_transactions(txns, cats)
+                from .decision_service import categorize as decide
+                suggestions = decide(txns, cats)
                 cat_by_name = {c["name"]: c["id"] for c in repo.list_categories()}
                 for sug in suggestions:
                     cid = cat_by_name.get(sug.get("category"))

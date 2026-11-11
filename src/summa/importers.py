@@ -143,14 +143,88 @@ def parse_ofx(path: Path) -> list[dict]:
     return out
 
 
+
+def parse_pdf(path: Path) -> list[dict]:
+    """Extract transactions from a PDF bank statement (best-effort text parsing)."""
+    try:
+        from pypdf import PdfReader
+    except Exception:
+        return []
+    import contextlib, io
+    try:
+        with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+            reader = PdfReader(str(path))
+    except Exception:
+        return []
+    text = ""
+    for page in reader.pages:
+        try:
+            with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+                text += (page.extract_text() or "") + "\n"
+        except Exception:
+            continue
+    if not text.strip():
+        return []
+
+    # date patterns
+    date_re = re.compile(
+        r"(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}|\d{8})"
+    )
+    # amount pattern: optional sign, digits with optional thousand/decimal separators
+    amt_re = re.compile(r"([+\-]?\s*(?:\d{1,3}(?:[.\s]\d{3})*(?:,\d{2})|\d+(?:[.,]\d{2})))")
+
+    out = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        mdate = date_re.search(line)
+        if not mdate:
+            continue
+        d = _parse_date(mdate.group(1))
+        if not d:
+            continue
+        # find amount: prefer the last numeric token on the line
+        amt_candidates = amt_re.findall(line)
+        amount = None
+        # try from the end
+        for cand in reversed(amt_candidates):
+            v = _to_float(cand)
+            if v is not None and v != 0:
+                amount = v
+                break
+        if amount is None:
+            continue
+        # description: remove date and amount substrings
+        desc = line.replace(mdate.group(1), "", 1)
+        desc = desc.replace(str(amt_candidates[-1] if amt_candidates else ""), "", 1) if amt_candidates else desc
+        desc = " ".join(desc.split())
+        if not desc:
+            desc = "(no description)"
+        out.append({"date": d, "description": desc, "amount": amount, "raw": line})
+    return out
+
+
+
 def parse_statement(path: Path) -> list[dict]:
     path = Path(path)
     suffix = path.suffix.lower()
     if suffix in (".ofx", ".qfx"):
         return parse_ofx(path)
+    if suffix == ".pdf":
+        res = parse_pdf(path)
+        if res:
+            return res
     # try csv first
     try:
         res = parse_csv(path)
+        if res:
+            return res
+    except Exception:
+        pass
+    # fallback pdf
+    try:
+        res = parse_pdf(path)
         if res:
             return res
     except Exception:
