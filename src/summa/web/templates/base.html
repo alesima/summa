@@ -48,20 +48,21 @@
   <!-- Sidebar -->
   <aside class="w-60 shrink-0 border-r hidden md:block" style="background: var(--sidebar); border-color: var(--border);">
     <div class="p-5 flex items-center justify-between gap-3">
-      <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
       <div class="flex items-center gap-2">
-        <select onchange="window.location='/set-lang?lang='+this.value" class="inp text-xs" style="width:auto; padding:0.25rem 1.8rem 0.25rem 0.5rem;">
-          {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
-        </select>
-        <button onclick="toggleTheme()" aria-label="Toggle theme"
-          class="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none shrink-0"
-          style="background: var(--border);">
-          <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-[10px]"
-                style="background: var(--accent); color: #fff;">
-            <i id="theme-icon" class="fas fa-sun"></i>
-          </span>
-        </button>
+        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" rx="22" fill="#22c55e"/>
+          <text x="50" y="72" font-size="64" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-weight="800">S</text>
+        </svg>
+        <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
       </div>
+      <button onclick="toggleTheme()" aria-label="Toggle theme"
+        class="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none shrink-0"
+        style="background: var(--border);">
+        <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-[10px]"
+              style="background: var(--accent); color: #fff;">
+          <i id="theme-icon" class="fas fa-sun"></i>
+        </span>
+      </button>
     </div>
     <nav class="px-3 pb-6">
       <div class="section-title">{{ t("overview") }}</div>
@@ -83,11 +84,22 @@
       <a href="/usage" class="nav-link"><i class="fas fa-chart-bar mr-2 w-4"></i>{{ t("usage") }}</a>
       <a href="/export" class="nav-link"><i class="fas fa-download mr-2 w-4"></i>{{ t("export_csv") }}</a>
       <a href="/chart" class="nav-link"><i class="fas fa-chart-pie mr-2 w-4"></i>{{ t("chart") }}</a>
+    <div class="px-3 pb-4">
+      <select onchange="window.location='/set-lang?lang='+this.value" class="inp text-xs w-full">
+        {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select>
+    </div>
     </nav>
   </aside>
   <!-- Mobile header -->
   <div class="md:hidden fixed top-0 left-0 right-0 z-20 border-b px-4 py-3 flex items-center justify-between" style="background: var(--card); border-color: var(--border);">
-    <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
+    <div class="flex items-center gap-2">
+      <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="22" fill="#22c55e"/>
+        <text x="50" y="72" font-size="64" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-weight="800">S</text>
+      </svg>
+      <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
+    </div>
     <button onclick="toggleTheme()" aria-label="Toggle theme"
       class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
       style="background: var(--border);">
