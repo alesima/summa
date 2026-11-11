@@ -64,12 +64,12 @@
     <h2 class="font-bold mb-3">{{ t("recent_transactions") }}</h2>
     <div id="tx-table" class="overflow-x-auto">
       <table>
-        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
+        <thead><tr><th>Date</th><th class="description">Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
         <tbody>
         {% for t in txns %}
           <tr>
             <td class="text-sm"><span class="fmt-date" data-iso="{{ t.date }}">{{ t.date }}</span></td>
-            <td class="text-sm">{{ t.description[:28] }}</td>
+            <td class="description text-sm">{{ t.description[:28] }}</td>
             <td class="text-sm muted">{{ t.category_name or '-' }}</td>
             <td class="text-right text-sm font-mono {% if t.amount_cents > 0 %}text-green-500{% else %}text-red-500{% endif %}">{{ "%.2f"|format(t.amount_cents/100) }}</td>
           </tr>
