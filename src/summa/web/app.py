@@ -500,6 +500,19 @@ def models_page(request: Request):
     return templates.TemplateResponse(request, "models.html", _ctx(request, provider=provider, model=model))
 
 
+
+@app.get("/health")
+def health():
+    db.init()
+    try:
+        with db.db() as conn:
+            conn.execute("SELECT 1")
+        return {"status": "ok", "version": "0.1.0"}
+    except Exception as e:
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=503)
+
+
 def run_web(host: str = "127.0.0.1", port: int = 8000):
     import uvicorn
     uvicorn.run(app, host=host, port=port)
