@@ -1,6 +1,8 @@
 """Bank statement import business logic."""
 from __future__ import annotations
 
+import hashlib
+
 from datetime import date
 from typing import Optional
 
@@ -24,7 +26,7 @@ def is_transfer(acc: dict, parsed: dict, card_names: list[str]) -> bool:
 
 
 def import_statement(file, account_name: Optional[str] = None, *,
-                    dry_run: bool = False, categorize: bool = False) -> dict:
+                    dry_run: bool = False, categorize: bool = False, force: bool = False) -> dict:
     """Import a parsed statement into an account. Returns a summary dict."""
     db.init()
     accounts = repo.list_accounts()
@@ -33,6 +35,21 @@ def import_statement(file, account_name: Optional[str] = None, *,
     acc = repo.get_account(account_name) if account_name else (accounts[0] if len(accounts) == 1 else None)
     if not acc:
         raise ValueError("Account not specified and multiple accounts exist.")
+
+    # document-level dedup
+    try:
+        with open(file, "rb") as f:
+            file_hash = hashlib.sha256(f.read()).hexdigest()
+    except Exception:
+        file_hash = None
+    if file_hash:
+        existing_doc = repo.find_imported_document(file_hash, acc["id"])
+        if existing_doc and not force:
+            return {
+                "imported": 0, "skipped": 0, "parsed": 0, "account": acc["name"],
+                "duplicate_document": True,
+                "existing": existing_doc,
+            }
 
     parsed = importers.parse_statement(file)
     if not parsed:
@@ -60,6 +77,9 @@ def import_statement(file, account_name: Optional[str] = None, *,
         repo.add_transaction(tx)
         n += 1
 
+    if file_hash:
+        repo.record_imported_document(file_hash, str(file), acc["id"], n)
+
     categorized = 0
     if categorize:
         txns = repo.list_transactions(uncategorized=True, limit=500)
@@ -78,4 +98,5 @@ def import_statement(file, account_name: Optional[str] = None, *,
                 pass
 
     return {"imported": n, "skipped": skipped, "parsed": len(parsed),
-            "categorized": categorized, "account": acc["name"], "parsed_rows": parsed}
+            "categorized": categorized, "account": acc["name"], "parsed_rows": parsed,
+            "duplicate_document": False}

@@ -84,10 +84,10 @@ def test_import_dedup_and_transfer(tmp_path):
     csvp.write_text("Data;Descricao;Valor\n10/11/2026;Pagamento cartao Card;-200.00\n09/11/2026;Mercado;-50.00\n")
     r = runner.invoke(app, ["tx", "import", str(csvp), "--account", "Checking"])
     assert r.exit_code == 0
-    # import again -> dedup skips both
+    # import again -> document-level dedup blocks it
     r = runner.invoke(app, ["tx", "import", str(csvp), "--account", "Checking"])
     assert r.exit_code == 0
-    assert "Skipped 2" in r.output
+    assert "already imported" in r.output.lower()
     # the payment should be categorized as transfer
     r = runner.invoke(app, ["tx", "list", "--account", "Checking"])
     assert "Transfer" in r.output or "Transferência" in r.output

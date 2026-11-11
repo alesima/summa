@@ -70,6 +70,16 @@ CREATE TABLE IF NOT EXISTS token_usage (
     total_tokens INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS imported_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_hash TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    transactions_count INTEGER NOT NULL DEFAULT 0,
+    imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(file_hash, account_id)
+);
 """
 
 DEFAULT_CATEGORIES = [

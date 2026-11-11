@@ -101,6 +101,7 @@ def register(app: typer.Typer) -> None:
         account: Optional[str] = typer.Option(None, "--account", "-a"),
         dry_run: bool = typer.Option(False, "--dry-run", help="Show only, do not save."),
         categorize: bool = typer.Option(False, "--categorize", "-C", help="Auto-categorize with AI after import."),
+        force: bool = typer.Option(False, "--force", help="Re-import even if document was already imported."),
     ):
         """Import a bank statement (CSV/OFX)."""
         db.init()
@@ -126,7 +127,11 @@ def register(app: typer.Typer) -> None:
         if dry_run:
             return
         from ..services.import_service import import_statement
-        result = import_statement(file, account_name=acc["name"], categorize=categorize)
+        result = import_statement(file, account_name=acc["name"], categorize=categorize, force=force)
+        if result.get("duplicate_document"):
+            ex = result.get("existing", {})
+            console.print(f"[yellow]This document was already imported on {ex.get('imported_at')} ({ex.get('transactions_count')} transactions). Skipping.[/yellow]")
+            return
         console.print(f"[green]Imported {result['imported']} transactions into account {acc['name']}.[/green]")
         if result["skipped"]:
             console.print(f"[yellow]Skipped {result['skipped']} duplicate transactions.[/yellow]")

@@ -219,3 +219,25 @@ def budget_status(month: str) -> list[dict]:
             (month, start, end),
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+# ---------- Imported documents (dedup) ----------
+def find_imported_document(file_hash: str, account_id: int) -> Optional[dict]:
+    with db() as conn:
+        row = conn.execute(
+            "SELECT * FROM imported_documents WHERE file_hash=? AND account_id=?",
+            (file_hash, account_id),
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def record_imported_document(file_hash: str, filename: str, account_id: int, count: int) -> None:
+    with db() as conn:
+        conn.execute(
+            """INSERT INTO imported_documents(file_hash, filename, account_id, transactions_count)
+               VALUES (?,?,?,?)
+               ON CONFLICT(file_hash, account_id) DO UPDATE SET
+                   transactions_count=excluded.transactions_count,
+                   imported_at=datetime('now')""",
+            (file_hash, filename, account_id, count),
+        )

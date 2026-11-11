@@ -61,11 +61,12 @@ def register(app: typer.Typer) -> None:
         account: Optional[str] = typer.Option(None, "--account", "-a"),
         dry_run: bool = typer.Option(False, "--dry-run", help="Show only, do not save."),
         categorize: bool = typer.Option(False, "--categorize", "-C", help="Auto-categorize with AI after import."),
+        force: bool = typer.Option(False, "--force", help="Re-import even if document was already imported."),
     ):
         """Import a bank statement (CSV/OFX)."""
         # delegate to transactions module
         from .transactions import tx_import
-        tx_import(file, account=account, dry_run=dry_run, categorize=categorize)
+        tx_import(file, account=account, dry_run=dry_run, categorize=categorize, force=force)
 
     @app.command("usage")
     def usage_cmd(
