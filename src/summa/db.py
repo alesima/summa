@@ -62,6 +62,15 @@ CREATE TABLE IF NOT EXISTS fx_rates (
     UNIQUE(base_currency, quote_currency)
 );
 
+CREATE TABLE IF NOT EXISTS memories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL UNIQUE,
+    value TEXT NOT NULL,
+    scope TEXT NOT NULL DEFAULT 'global',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS token_usage (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model TEXT NOT NULL,

@@ -107,6 +107,37 @@ def chat(system: str, user: str, *, json_mode: bool = False) -> str:
         pass
     return (choice.content if getattr(choice, "content", None) else "") or ""
 
+def chat_with_history(system: str, messages: list[dict]) -> str:
+    """Multi-turn chat using an OpenAI-compatible client. Returns assistant reply."""
+    provider = resolve_provider()
+    if provider == "none":
+        raise RuntimeError(
+            "No AI credentials configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY "
+            "(or SUMMA_AI_BASE_URL for a local endpoint)."
+        )
+    model = resolve_model(provider)
+    client = _client()
+    full = [{"role": "system", "content": system}] + messages
+    resp = client.chat.completions.create(model=model, messages=full)
+    choice = resp.choices[0].message
+    # record usage
+    try:
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            from . import db
+            with db.db() as conn:
+                conn.execute(
+                    "INSERT INTO token_usage(model, prompt_tokens, completion_tokens, total_tokens) VALUES (?,?,?,?)",
+                    (model,
+                     getattr(usage, "prompt_tokens", 0) or 0,
+                     getattr(usage, "completion_tokens", 0) or 0,
+                     getattr(usage, "total_tokens", 0) or 0),
+                )
+    except Exception:
+        pass
+    return (choice.content if getattr(choice, "content", None) else "") or ""
+
+
 
 def categorize_transactions(txns: list[dict], categories: list[str]) -> list[dict]:
     if not txns:
@@ -151,5 +182,9 @@ def answer_question(question: str, context: str) -> str:
         "Do not invent numbers. "
         f"Respond in {lang}."
     )
+    from . import repo
+    mem = repo.memories_as_context()
+    if mem:
+        context = context + "\n\n" + mem
     user = f"Question: {question}\n\nData:\n{context}"
     return chat(system, user)

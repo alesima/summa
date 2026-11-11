@@ -46,7 +46,18 @@ def register(app: typer.Typer) -> None:
     def chat():
         """Interactive chat (REPL)."""
         db.init()
-        console.print("Chat mode. Type 'exit' to quit.")
+        console.print("Chat mode. Type 'exit' to quit. (conversation memory enabled)")
+        from ..i18n import get_language, language_name
+        lang = language_name(get_language())
+        ctx_txns = repo.list_transactions(limit=200)
+        lines = [f"{t['date']} | {t['description']} | {t['category_name'] or '-'} | {t['amount_cents']/100.0:.2f}" for t in ctx_txns]
+        mem = repo.memories_as_context() if hasattr(repo, "memories_as_context") else ""
+        system = (
+            "You are a personal finance assistant. Answer concisely using the provided data and memories. "
+            f"Respond in {lang}.\n\nTransactions:\n" + "\n".join(lines) +
+            ("\n\n" + mem if mem else "")
+        )
+        history = []
         while True:
             try:
                 q = typer.prompt(">")
@@ -54,14 +65,14 @@ def register(app: typer.Typer) -> None:
                 break
             if q.strip().lower() in ("exit", "quit", "sair"):
                 break
-            ctx_txns = repo.list_transactions(limit=200)
-            lines = [f"{t['date']} | {t['description']} | {t['category_name'] or '-'} | {t['amount_cents']/100.0:.2f}" for t in ctx_txns]
-            context = "Transactions:\n" + "\n".join(lines)
+            history.append({"role": "user", "content": q})
             try:
-                ans = ai.answer_question(q, context)
+                ans = ai.chat_with_history(system, history)
+                history.append({"role": "assistant", "content": ans})
                 console.print(ans)
             except Exception as e:
                 console.print(f"[red]Error:[/red] {e}")
+                history.pop()
 
     @app.command()
     def plan(

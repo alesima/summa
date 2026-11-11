@@ -241,3 +241,48 @@ def record_imported_document(file_hash: str, filename: str, account_id: int, cou
                    imported_at=datetime('now')""",
             (file_hash, filename, account_id, count),
         )
+
+
+# ---------- Memories ----------
+def add_memory(key: str, value: str, scope: str = "global") -> int:
+    db.init()
+    with db() as conn:
+        cur = conn.execute(
+            """INSERT INTO memories(key, value, scope) VALUES (?,?,?)
+               ON CONFLICT(key) DO UPDATE SET value=excluded.value, scope=excluded.scope, updated_at=datetime('now')""",
+            (key, value, scope),
+        )
+        return cur.lastrowid
+
+
+def list_memories(scope: Optional[str] = None) -> list[dict]:
+    try:
+        with db() as conn:
+            if scope:
+                rows = conn.execute("SELECT * FROM memories WHERE scope=? ORDER BY key", (scope,)).fetchall()
+            else:
+                rows = conn.execute("SELECT * FROM memories ORDER BY key").fetchall()
+            return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+def get_memory(key: str) -> Optional[dict]:
+    with db() as conn:
+        row = conn.execute("SELECT * FROM memories WHERE key=?", (key,)).fetchone()
+        return dict(row) if row else None
+
+
+def delete_memory(key: str) -> bool:
+    db.init()
+    with db() as conn:
+        cur = conn.execute("DELETE FROM memories WHERE key=?", (key,))
+        return cur.rowcount > 0
+
+
+def memories_as_context() -> str:
+    rows = list_memories()
+    if not rows:
+        return ""
+    lines = [f"- {r['key']}: {r['value']}" for r in rows]
+    return "User memories/notes:\n" + "\n".join(lines)
