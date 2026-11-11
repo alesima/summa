@@ -1,0 +1,31 @@
+[project]
+name = "summa"
+version = "0.1.0"
+description = "Terminal personal finance tracker with AI"
+readme = "README.md"
+authors = [
+    { name = "Alex", email = "alex@codingwithalex.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "anthropic>=2.8.0",
+    "openai>=3.49.0",
+    "pydantic>=2.14.3",
+    "python-dotenv>=1.2.4",
+    "rich>=15.0.0",
+    "textual>=8.2.8",
+    "typer>=0.29.0",
+]
+
+[project.scripts]
+summa = "summa:main"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+]
