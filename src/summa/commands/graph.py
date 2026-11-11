@@ -43,6 +43,55 @@ def register(app: typer.Typer) -> None:
             t.add_row(r["subject"], r["predicate"], r["object"], f"{r['confidence']:.2f}")
         console.print(t if rows else f"No triples for {subject}.")
 
+    @graph_app.command("sync")
+    def graph_sync():
+        """Auto-populate the graph from accounts, categories and transactions."""
+        db.init()
+        from ..services.graph_service import sync_from_data
+        counts = sync_from_data()
+        console.print(f"[green]Graph synced:[/green] {counts['accounts']} accounts, "
+                      f"{counts['merchants']} merchants, {counts['categories']} categories.")
+
+    @graph_app.command("show")
+    def graph_show(limit: int = typer.Option(50, "--limit", "-n", help="Max triples to show."),
+                  subject: Optional[str] = typer.Option(None, "--subject", "-s", help="Filter by subject.")):
+        """Pretty-print the graph grouped by subject."""
+        db.init()
+        rows = repo.list_triples(subject=subject)
+        if not rows:
+            console.print("No triples. Run [bold]summa graph sync[/bold] to populate.")
+            return
+        from collections import defaultdict
+        groups = defaultdict(list)
+        for r in rows[:limit]:
+            groups[r["subject"]].append(r)
+        for subj, rels in groups.items():
+            console.print(f"[bold cyan]{subj}[/bold cyan]")
+            for r in rels:
+                console.print(f"  --{r['predicate']}--> {r['object']}  [dim](conf {r['confidence']:.2f})[/dim]")
+        if len(rows) > limit:
+            console.print(f"[dim]... and {len(rows)-limit} more (use --limit)[/dim]")
+
+    @graph_app.command("clear")
+    def graph_clear(confirm: bool = typer.Option(False, "--yes", "-y", help="Confirm clearing all triples.")):
+        """Clear all graph triples."""
+        db.init()
+        if not confirm:
+            console.print("Use --yes to confirm.")
+            raise typer.Exit(1)
+        with db.db() as conn:
+            conn.execute("DELETE FROM graph_triples")
+        console.print("[green]Graph cleared.[/green]")
+
+    @graph_app.command("stats")
+    def graph_stats():
+        """Show graph statistics."""
+        db.init()
+        rows = repo.list_triples()
+        subjects = {r["subject"] for r in rows}
+        preds = {r["predicate"] for r in rows}
+        console.print(f"Triples: {len(rows)} | Subjects: {len(subjects)} | Predicates: {len(preds)}")
+
     @graph_app.command("remove")
     def graph_remove(subject: str, predicate: str, obj: str):
         """Remove a triple."""

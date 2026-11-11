@@ -75,6 +75,19 @@ def import_statement(file, account_name: Optional[str] = None, *,
             category_id=cat_id,
         )
         repo.add_transaction(tx)
+        if cat_id is not None:
+            cat_obj = repo.get_category(cat_id) if False else None
+        # auto-add merchant->category triple
+        try:
+            from .graph_service import auto_add_transaction
+            cat_name = None
+            if cat_id is not None:
+                for c in repo.list_categories():
+                    if c["id"] == cat_id:
+                        cat_name = c["name"]; break
+            auto_add_transaction(p["description"], cat_name)
+        except Exception:
+            pass
         n += 1
 
     if file_hash:
@@ -94,6 +107,15 @@ def import_statement(file, account_name: Optional[str] = None, *,
                     if cid is not None:
                         repo.update_transaction_category(sug["id"], cid)
                         categorized += 1
+                        # find description
+                        for t in txns:
+                            if t["id"] == sug["id"]:
+                                try:
+                                    from .graph_service import auto_add_transaction
+                                    auto_add_transaction(t["description"], sug.get("category"))
+                                except Exception:
+                                    pass
+                                break
             except Exception:
                 pass
 
