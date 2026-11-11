@@ -41,77 +41,75 @@
   </style>
 </head>
 <body class="min-h-screen antialiased">
-  <!-- Top navbar -->
-  <header class="sticky top-0 z-20 border-b" style="background: color-mix(in srgb, var(--card) 85%, transparent); backdrop-filter: blur(8px); border-color: var(--border);">
-    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-4">
-      <!-- Logo -->
-      <a href="/" class="flex items-center gap-2 shrink-0">
-        <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100" height="100" rx="22" fill="#22c55e"/>
-          <text x="50" y="72" font-size="64" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-weight="800">S</text>
-        </svg>
-        <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
-      </a>
-      <!-- Search -->
-      <form action="/search" method="get" class="flex-1 max-w-md">
-        <div class="relative">
-          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style="color: var(--muted);"></i>
-          <input name="q" class="inp pl-9 py-2 text-sm" placeholder="Search transactions..." value="{{ q or '' }}">
+  <!-- Sidebar -->
+  <aside class="w-56 shrink-0 border-r hidden md:flex flex-col" style="background: var(--sidebar); border-color: var(--border);">
+    <div class="p-5 flex items-center gap-2">
+      <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="22" fill="#22c55e"/>
+        <text x="50" y="72" font-size="64" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-weight="800">S</text>
+      </svg>
+      <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
+    </div>
+    <nav class="px-3 pb-4 flex-1">
+      <div class="section-title">{{ t("overview") }}</div>
+      <a href="/" class="nav-link"><i class="fas fa-chart-line mr-2 w-4"></i>{{ t("dashboard") }}</a>
+      <a href="/transactions" class="nav-link"><i class="fas fa-receipt mr-2 w-4"></i>{{ t("transactions") }}</a>
+      <a href="/budgets" class="nav-link"><i class="fas fa-wallet mr-2 w-4"></i>{{ t("budgets") }}</a>
+      <a href="/import" class="nav-link"><i class="fas fa-file-import mr-2 w-4"></i>{{ t("import") }}</a>
+      <div class="section-title">{{ t("ai") }}</div>
+      <a href="/ask" class="nav-link"><i class="fas fa-comments mr-2 w-4"></i>{{ t("ask_ai") }}</a>
+      <a href="/plan" class="nav-link"><i class="fas fa-bullseye mr-2 w-4"></i>{{ t("plan") }}</a>
+      <a href="/review" class="nav-link"><i class="fas fa-clipboard-check mr-2 w-4"></i>{{ t("review") }}</a>
+      <div class="section-title">{{ t("manage") }}</div>
+      <a href="/accounts" class="nav-link"><i class="fas fa-university mr-2 w-4"></i>{{ t("accounts") }}</a>
+      <a href="/categories" class="nav-link"><i class="fas fa-tags mr-2 w-4"></i>{{ t("categories") }}</a>
+      <a href="/memory" class="nav-link"><i class="fas fa-brain mr-2 w-4"></i>{{ t("memory") }}</a>
+      <a href="/graph" class="nav-link"><i class="fas fa-project-diagram mr-2 w-4"></i>{{ t("graph") }}</a>
+      <a href="/fx" class="nav-link"><i class="fas fa-exchange-alt mr-2 w-4"></i>{{ t("fx_rates") }}</a>
+      <div class="section-title">{{ t("tools") }}</div>
+      <a href="/usage" class="nav-link"><i class="fas fa-chart-bar mr-2 w-4"></i>{{ t("usage") }}</a>
+      <a href="/export" class="nav-link"><i class="fas fa-download mr-2 w-4"></i>{{ t("export_csv") }}</a>
+      <a href="/chart" class="nav-link"><i class="fas fa-chart-pie mr-2 w-4"></i>{{ t("chart") }}</a>
+    </nav>
+  </aside>
+  <div class="flex-1 min-w-0 flex flex-col">
+    <!-- Top navbar (only over content) -->
+    <header class="sticky top-0 z-20 border-b" style="background: color-mix(in srgb, var(--card) 85%, transparent); backdrop-filter: blur(8px); border-color: var(--border);">
+      <div class="px-6 py-3 flex items-center gap-4">
+        <form action="/search" method="get" class="flex-1 max-w-md">
+          <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style="color: var(--muted);"></i>
+            <input name="q" class="inp pl-9 py-2 text-sm" placeholder="Search transactions..." value="{{ q or '' }}">
+          </div>
+        </form>
+        <div class="flex items-center gap-3 shrink-0">
+          <select onchange="window.location='/set-lang?lang='+this.value" class="inp text-xs" style="width:auto; padding:0.3rem 1.8rem 0.3rem 0.6rem;">
+            {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
+          </select>
+          <button onclick="toggleTheme()" aria-label="Toggle theme"
+            class="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none shrink-0"
+            style="background: var(--border);">
+            <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-[10px]"
+                  style="background: var(--accent); color: #fff;">
+              <i id="theme-icon" class="fas fa-sun"></i>
+            </span>
+          </button>
         </div>
-      </form>
-      <div class="flex items-center gap-3 shrink-0">
-        <select onchange="window.location='/set-lang?lang='+this.value" class="inp text-xs" style="width:auto; padding:0.3rem 1.8rem 0.3rem 0.6rem;">
-          {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
-        </select>
-        <button onclick="toggleTheme()" aria-label="Toggle theme"
-          class="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none shrink-0"
-          style="background: var(--border);">
-          <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-[10px]"
-                style="background: var(--accent); color: #fff;">
-            <i id="theme-icon" class="fas fa-sun"></i>
-          </span>
-        </button>
       </div>
-    </div>
-  </header>
-  <div class="flex min-h-[calc(100vh-57px)]">
-    <!-- Sidebar -->
-    <aside class="w-56 shrink-0 border-r hidden md:block" style="background: var(--sidebar); border-color: var(--border);">
-      <nav class="px-3 py-4">
-        <div class="section-title">{{ t("overview") }}</div>
-        <a href="/" class="nav-link"><i class="fas fa-chart-line mr-2 w-4"></i>{{ t("dashboard") }}</a>
-        <a href="/transactions" class="nav-link"><i class="fas fa-receipt mr-2 w-4"></i>{{ t("transactions") }}</a>
-        <a href="/budgets" class="nav-link"><i class="fas fa-wallet mr-2 w-4"></i>{{ t("budgets") }}</a>
-        <a href="/import" class="nav-link"><i class="fas fa-file-import mr-2 w-4"></i>{{ t("import") }}</a>
-        <div class="section-title">{{ t("ai") }}</div>
-        <a href="/ask" class="nav-link"><i class="fas fa-comments mr-2 w-4"></i>{{ t("ask_ai") }}</a>
-        <a href="/plan" class="nav-link"><i class="fas fa-bullseye mr-2 w-4"></i>{{ t("plan") }}</a>
-        <a href="/review" class="nav-link"><i class="fas fa-clipboard-check mr-2 w-4"></i>{{ t("review") }}</a>
-        <div class="section-title">{{ t("manage") }}</div>
-        <a href="/accounts" class="nav-link"><i class="fas fa-university mr-2 w-4"></i>{{ t("accounts") }}</a>
-        <a href="/categories" class="nav-link"><i class="fas fa-tags mr-2 w-4"></i>{{ t("categories") }}</a>
-        <a href="/memory" class="nav-link"><i class="fas fa-brain mr-2 w-4"></i>{{ t("memory") }}</a>
-        <a href="/graph" class="nav-link"><i class="fas fa-project-diagram mr-2 w-4"></i>{{ t("graph") }}</a>
-        <a href="/fx" class="nav-link"><i class="fas fa-exchange-alt mr-2 w-4"></i>{{ t("fx_rates") }}</a>
-        <div class="section-title">{{ t("tools") }}</div>
-        <a href="/usage" class="nav-link"><i class="fas fa-chart-bar mr-2 w-4"></i>{{ t("usage") }}</a>
-        <a href="/export" class="nav-link"><i class="fas fa-download mr-2 w-4"></i>{{ t("export_csv") }}</a>
-        <a href="/chart" class="nav-link"><i class="fas fa-chart-pie mr-2 w-4"></i>{{ t("chart") }}</a>
-      </nav>
-    </aside>
-    <!-- Mobile nav -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 z-20 border-t flex overflow-x-auto" style="background: var(--card); border-color: var(--border);">
-      <a href="/" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-chart-line"></i></a>
-      <a href="/transactions" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-receipt"></i></a>
-      <a href="/budgets" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-wallet"></i></a>
-      <a href="/ask" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-comments"></i></a>
-      <a href="/memory" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-brain"></i></a>
-    </div>
-    <main class="flex-1 min-w-0 p-6 md:p-8 pb-20 md:pb-8">
+    </header>
+    <main class="flex-1 p-6 md:p-8 pb-20 md:pb-8">
       <div class="max-w-5xl mx-auto">
         {% block content %}{% endblock %}
       </div>
     </main>
+  </div>
+  <!-- Mobile nav -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 z-20 border-t flex overflow-x-auto" style="background: var(--card); border-color: var(--border);">
+    <a href="/" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-chart-line"></i></a>
+    <a href="/transactions" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-receipt"></i></a>
+    <a href="/budgets" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-wallet"></i></a>
+    <a href="/ask" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-comments"></i></a>
+    <a href="/memory" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-brain"></i></a>
   </div>
   <!-- Loading overlay -->
   <div id="loader" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(2px);">
