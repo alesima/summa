@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Token usage tracking (`summa usage`) with optional cost estimate.
 - Persistent AI memory: `summa memory add/list/remove` and multi-turn chat with history.
-- Knowledge graph (triples): `summa graph add/list/query/remove/sync/show/clear/stats`, auto-populated from data, injected into AI context.
+- Knowledge graph (triples): `summa graph add/list/query/remove/sync/show/clear/stats/alias`, auto-populated from data, merchant normalization, aliases, injected into AI context.
 
 ## [0.1.0] - 2026-11-10
 
