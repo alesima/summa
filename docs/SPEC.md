@@ -56,7 +56,7 @@ negative) to avoid floating point errors.
 See `docs/COMMANDS.md`.
 
 Top-level commands: `init`, `lang`, `export`, `import`, `dashboard`, `ask`,
-`chat`, `plan`, `review`, `usage`, plus sub-apps `account`, `category`, `tx`,
+`chat`, `plan`, `review`, `usage`, `memory`, plus sub-apps `account`, `category`, `tx`,
 `budget`, `report`, `chart`, `fx`.
 
 ## 5. AI Integration

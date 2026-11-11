@@ -14,6 +14,7 @@
 | `plan` | Generate a financial plan (AI). |
 | `review` | Monthly review with AI insights. |
 | `usage` | Show AI token usage and cost estimate. |
+| `memory` | Manage persistent AI memory/notes. |
 
 ## account
 - `account add <name> [--type] [--currency]`
@@ -42,6 +43,11 @@
 ## chart
 - `chart spending [--month]`
 - `chart trend [--months]`
+
+## memory
+- `memory add <key> <value> [--scope]`
+- `memory list [--scope]`
+- `memory remove <key>`
 
 ## fx
 - `fx set <base> <quote> <rate>`
