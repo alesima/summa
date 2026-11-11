@@ -1,12 +1,54 @@
 {% extends "base.html" %}
-{% block title %}Usage - summa{% endblock %}
+{% block title %}{{ t('usage') }} - summa{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold mb-6">{{ t('ai_token_usage') }}</h1>
+
+<!-- Totals cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold" style="color: var(--accent);">{{ tot[0] }}</div>
+    <div class="text-xs muted">{{ t('prompt') }}</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold" style="color: var(--accent);">{{ tot[1] }}</div>
+    <div class="text-xs muted">{{ t('completion') }}</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold" style="color: var(--accent);">{{ tot[2] }}</div>
+    <div class="text-xs muted">{{ t('total') }}</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold" style="color: var(--accent);">{{ tot[3] }}</div>
+    <div class="text-xs muted">{{ t('calls') }}</div>
+  </div>
+</div>
+
+<!-- Per model -->
 <div class="card p-4">
+  <h2 class="font-bold mb-3">{{ t('model') }}</h2>
+  {% if rows %}
   <table>
     <thead><tr><th>{{ t('model') }}</th><th>{{ t('calls') }}</th><th>{{ t('prompt') }}</th><th>{{ t('completion') }}</th><th>{{ t('total') }}</th></tr></thead>
-    <tbody>{% for r in rows %}<tr><td>{{ r.model }}</td><td>{{ r.n }}</td><td>{{ r.p }}</td><td>{{ r.c }}</td><td>{{ r.t }}</td></tr>{% endfor %}</tbody>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td class="font-medium">{{ r.model }}</td>
+        <td>{{ r.n }}</td>
+        <td class="font-mono">{{ r.p }}</td>
+        <td class="font-mono">{{ r.c }}</td>
+        <td class="font-mono font-bold">{{ r.t }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
   </table>
-  <p class="muted mt-4">{{ t('total') }}s: prompt={{ tot[0] }} completion={{ tot[1] }} total={{ tot[2] }} calls={{ tot[3] }}</p>
+  {% else %}
+  <p class="muted text-sm p-4">No usage recorded yet.</p>
+  {% endif %}
+</div>
+
+<!-- Cost estimate hint -->
+<div class="card p-4 mt-4 text-sm muted">
+  <i class="fas fa-info-circle mr-1"></i>
+  Use <code>summa usage --price-input X --price-output Y</code> for cost estimates.
 </div>
 {% endblock %}
