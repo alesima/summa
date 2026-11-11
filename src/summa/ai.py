@@ -138,6 +138,52 @@ def chat_with_history(system: str, messages: list[dict]) -> str:
     return (choice.content if getattr(choice, "content", None) else "") or ""
 
 
+def chat_stream(system: str, messages: list[dict]):
+    """Stream assistant reply chunks (generator). Yields text deltas."""
+    provider = resolve_provider()
+    if provider == "none":
+        raise RuntimeError(
+            "No AI credentials configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY "
+            "(or SUMMA_AI_BASE_URL for a local endpoint)."
+        )
+    model = resolve_model(provider)
+    client = _client()
+    full = [{"role": "system", "content": system}] + messages
+    kwargs = {"model": model, "messages": full, "stream": True}
+    # request usage in final chunk when supported
+    try:
+        kwargs["stream_options"] = {"include_usage": True}
+    except Exception:
+        pass
+    stream = client.chat.completions.create(**kwargs)
+    prompt_tokens = 0
+    completion_tokens = 0
+    total_tokens = 0
+    for chunk in stream:
+        # usage may arrive in final chunk
+        u = getattr(chunk, "usage", None)
+        if u is not None:
+            prompt_tokens = getattr(u, "prompt_tokens", prompt_tokens) or prompt_tokens
+            completion_tokens = getattr(u, "completion_tokens", completion_tokens) or completion_tokens
+            total_tokens = getattr(u, "total_tokens", total_tokens) or total_tokens
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta
+        content = getattr(delta, "content", None)
+        if content:
+            yield content
+    # record usage (best-effort)
+    try:
+        from . import db
+        with db.db() as conn:
+            conn.execute(
+                "INSERT INTO token_usage(model, prompt_tokens, completion_tokens, total_tokens) VALUES (?,?,?,?)",
+                (model, prompt_tokens, completion_tokens, total_tokens),
+            )
+    except Exception:
+        pass
+
+
 
 def categorize_transactions(txns: list[dict], categories: list[str]) -> list[dict]:
     if not txns:

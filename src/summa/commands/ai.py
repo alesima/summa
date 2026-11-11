@@ -69,11 +69,25 @@ def register(app: typer.Typer) -> None:
                 break
             history.append({"role": "user", "content": q})
             try:
-                ans = ai.chat_with_history(system, history)
-                history.append({"role": "assistant", "content": ans})
-                console.print(ans)
+                from rich.status import Status
+                import sys
+                full = ""
+                # preloader while waiting for first token
+                with Status("[bold cyan]Thinking...[/bold cyan]", console=console, spinner="dots") as status:
+                    started = False
+                    for chunk in ai.chat_stream(system, history):
+                        if not started:
+                            status.stop()
+                            started = True
+                        full += chunk
+                        console.print(chunk, end="", soft_wrap=True)
+                        sys.stdout.flush()
+                    if not started:
+                        status.stop()
+                console.print()  # newline after stream
+                history.append({"role": "assistant", "content": full})
             except Exception as e:
-                console.print(f"[red]Error:[/red] {e}")
+                console.print(f"\n[red]Error:[/red] {e}")
                 history.pop()
 
     @app.command()
