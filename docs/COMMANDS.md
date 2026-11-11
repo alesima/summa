@@ -15,6 +15,7 @@
 | `review` | Monthly review with AI insights. |
 | `usage` | Show AI token usage and cost estimate. |
 | `memory` | Manage persistent AI memory/notes. |
+| `graph` | Manage knowledge graph (triples). |
 
 ## account
 - `account add <name> [--type] [--currency]`
@@ -48,6 +49,12 @@
 - `memory add <key> <value> [--scope]`
 - `memory list [--scope]`
 - `memory remove <key>`
+
+## graph
+- `graph add <subject> <predicate> <object> [--confidence]`
+- `graph list [--subject] [--predicate] [--object]`
+- `graph query <subject>`
+- `graph remove <subject> <predicate> <object>`
 
 ## fx
 - `fx set <base> <quote> <rate>`

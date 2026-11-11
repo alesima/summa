@@ -52,10 +52,12 @@ def register(app: typer.Typer) -> None:
         ctx_txns = repo.list_transactions(limit=200)
         lines = [f"{t['date']} | {t['description']} | {t['category_name'] or '-'} | {t['amount_cents']/100.0:.2f}" for t in ctx_txns]
         mem = repo.memories_as_context() if hasattr(repo, "memories_as_context") else ""
+        graph = repo.graph_as_context() if hasattr(repo, "graph_as_context") else ""
+        extra = "\n\n".join(x for x in (mem, graph) if x)
         system = (
-            "You are a personal finance assistant. Answer concisely using the provided data and memories. "
+            "You are a personal finance assistant. Answer concisely using the provided data and knowledge graph. "
             f"Respond in {lang}.\n\nTransactions:\n" + "\n".join(lines) +
-            ("\n\n" + mem if mem else "")
+            ("\n\n" + extra if extra else "")
         )
         history = []
         while True:
@@ -107,7 +109,8 @@ def register(app: typer.Typer) -> None:
             "Monthly history:\n" + "\n".join(mt_lines) +
             "\n\nSpending by category (current month):\n" + "\n".join(cat_lines) +
             "\n\nCurrent budgets:\n" + ("\n".join(bud_lines) if bud_lines else "(none)") +
-            f"\n\nUser goal: {goal or 'improve financial health'}"
+            f"\n\nUser goal: {goal or 'improve financial health'}" +
+            ("\n\n" + repo.graph_as_context() if repo.graph_as_context() else "")
         )
         lang = language_name(get_language())
         system = (
@@ -147,7 +150,8 @@ def register(app: typer.Typer) -> None:
             f"Balance: R$ {(mt['income_cents']+mt['expense_cents'])/100.0:.2f}\n"
             f"Transactions: {mt['count']}\n\n"
             "By category:\n" + "\n".join(cat_lines) +
-            "\n\nLargest expenses:\n" + "\n".join(exp_lines)
+            "\n\nLargest expenses:\n" + "\n".join(exp_lines) +
+            ("\n\n" + repo.graph_as_context() if repo.graph_as_context() else "")
         )
         lang = language_name(get_language())
         system = (

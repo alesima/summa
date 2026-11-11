@@ -286,3 +286,52 @@ def memories_as_context() -> str:
         return ""
     lines = [f"- {r['key']}: {r['value']}" for r in rows]
     return "User memories/notes:\n" + "\n".join(lines)
+
+
+# ---------- Knowledge graph (triples) ----------
+def add_triple(subject: str, predicate: str, object_: str, confidence: float = 1.0) -> int:
+    db.init()
+    with db() as conn:
+        cur = conn.execute(
+            """INSERT INTO graph_triples(subject, predicate, object, confidence) VALUES (?,?,?,?)
+               ON CONFLICT(subject, predicate, object) DO UPDATE SET confidence=excluded.confidence""",
+            (subject, predicate, object_, confidence),
+        )
+        return cur.lastrowid
+
+
+def list_triples(subject: Optional[str] = None, predicate: Optional[str] = None,
+                 object_: Optional[str] = None) -> list[dict]:
+    try:
+        with db() as conn:
+            q = "SELECT * FROM graph_triples WHERE 1=1"
+            params = []
+            if subject:
+                q += " AND subject=?"; params.append(subject)
+            if predicate:
+                q += " AND predicate=?"; params.append(predicate)
+            if object_:
+                q += " AND object=?"; params.append(object_)
+            q += " ORDER BY subject, predicate"
+            rows = conn.execute(q, params).fetchall()
+            return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+def delete_triple(subject: str, predicate: str, object_: str) -> bool:
+    db.init()
+    with db() as conn:
+        cur = conn.execute(
+            "DELETE FROM graph_triples WHERE subject=? AND predicate=? AND object=?",
+            (subject, predicate, object_),
+        )
+        return cur.rowcount > 0
+
+
+def graph_as_context(subject: Optional[str] = None) -> str:
+    rows = list_triples(subject=subject)
+    if not rows:
+        return ""
+    lines = [f"- {r['subject']} {r['predicate']} {r['object']} (conf {r['confidence']:.2f})" for r in rows]
+    return "Knowledge graph:\n" + "\n".join(lines)

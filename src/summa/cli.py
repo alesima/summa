@@ -15,6 +15,7 @@ from .commands import (
     system,
     ai,
     memory,
+    graph,
 )
 
 app = typer.Typer(name="summa", help="Terminal personal finance tracker with AI.", no_args_is_help=True)
@@ -31,6 +32,7 @@ def _register_all() -> None:
     system.register(app)
     ai.register(app)
     memory.register(app)
+    graph.register(app)
 
 
 _register_all()

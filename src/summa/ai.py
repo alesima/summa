@@ -184,7 +184,9 @@ def answer_question(question: str, context: str) -> str:
     )
     from . import repo
     mem = repo.memories_as_context()
-    if mem:
-        context = context + "\n\n" + mem
+    graph = repo.graph_as_context()
+    extra = "\n\n".join(x for x in (mem, graph) if x)
+    if extra:
+        context = context + "\n\n" + extra
     user = f"Question: {question}\n\nData:\n{context}"
     return chat(system, user)
