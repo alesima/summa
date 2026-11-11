@@ -4,7 +4,7 @@
 <h1 class="text-2xl font-bold mb-6">{{ t('budgets') }} — {{ month }}</h1>
 <div class="card p-4">
   <table>
-    <thead><tr><th>{{ t('category') }}</th><th>Budget</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
+    <thead><tr><th>{{ t('category') }}</th><th>{{ t('budget') }}</th><th>{{ t('spent') }}</th><th>{{ t('remaining') }}</th><th>%</th></tr></thead>
     <tbody>
     {% for b in rows %}
       <tr>

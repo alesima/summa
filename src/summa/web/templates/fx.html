@@ -4,7 +4,7 @@
 <h1 class="text-2xl font-bold mb-6">{{ t('exchange_rates') }}</h1>
 <div class="card p-4 mb-6">
   <table>
-    <thead><tr><th>{{ t('base') }}</th><th>{{ t('quote') }}</th><th>{{ t('rate') }}</th><th>Updated</th></tr></thead>
+    <thead><tr><th>{{ t('base') }}</th><th>{{ t('quote') }}</th><th>{{ t('rate') }}</th><th>{{ t('updated') }}</th></tr></thead>
     <tbody>{% for r in rows %}<tr><td>{{ r.base_currency }}</td><td>{{ r.quote_currency }}</td><td>{{ r.rate }}</td><td>{{ r.updated_at }}</td></tr>{% endfor %}</tbody>
   </table>
 </div>

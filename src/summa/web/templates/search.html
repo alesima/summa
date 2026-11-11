@@ -4,7 +4,7 @@
 <h1 class="text-2xl font-bold mb-6">Search: "{{ q }}"</h1>
 <div class="card p-4">
   <table>
-    <thead><tr><th>Date</th><th>Account</th><th>Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
+    <thead><tr><th>{{ t('date') }}</th><th>{{ t('account') }}</th><th>{{ t('description') }}</th><th>{{ t('category') }}</th><th class="text-right">{{ t('amount') }}</th></tr></thead>
     <tbody>
     {% for t in rows %}
       <tr>

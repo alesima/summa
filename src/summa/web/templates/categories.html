@@ -4,7 +4,7 @@
 <h1 class="text-2xl font-bold mb-6">{{ t('categories') }}</h1>
 <div class="card p-4 mb-6">
   <table>
-    <thead><tr><th>ID</th><th>Name</th><th>Kind</th></tr></thead>
+    <thead><tr><th>ID</th><th>{{ t('name') }}</th><th>{{ t('kind') }}</th></tr></thead>
     <tbody>{% for c in rows %}<tr><td>{{ c.id }}</td><td>{{ c.name }}</td><td>{{ c.kind }}</td></tr>{% endfor %}</tbody>
   </table>
 </div>
