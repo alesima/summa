@@ -1,4 +1,8 @@
-"""AI integration (OpenAI / Anthropic)."""
+"""Provider-agnostic AI integration.
+
+All providers are accessed through an OpenAI-compatible chat completions
+interface. This keeps the code independent of any specific vendor SDK.
+"""
 from __future__ import annotations
 
 import json
@@ -9,11 +13,26 @@ from .config import ai_provider, ai_model, openai_key, anthropic_key
 from .i18n import get_language, language_name
 
 
+def _base_url() -> Optional[str]:
+    if os.environ.get("SUMMA_AI_BASE_URL") or os.environ.get("OPENAI_BASE_URL"):
+        return os.environ.get("SUMMA_AI_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
+    provider = (ai_provider() or "").lower()
+    if provider == "anthropic":
+        return "https://api.anthropic.com/v1"
+    return None
+
+
+def _api_key() -> str:
+    p = (ai_provider() or "").lower()
+    if p == "anthropic":
+        return anthropic_key() or openai_key() or "ollama"
+    return openai_key() or anthropic_key() or "ollama"
+
+
 def resolve_provider() -> str:
-    p = ai_provider()
-    if p in ("openai", "anthropic"):
+    p = (ai_provider() or "").lower()
+    if p in ("openai", "anthropic", "ollama", "custom"):
         return p
-    # auto-detect
     if openai_key() or os.environ.get("SUMMA_AI_BASE_URL") or os.environ.get("OPENAI_BASE_URL"):
         return "openai"
     if anthropic_key():
@@ -25,57 +44,48 @@ def resolve_model(provider: str) -> str:
     m = ai_model()
     if m:
         return m
-    if provider == "openai":
-        return "o4-mini"
     if provider == "anthropic":
         return "claude-haiku-4-5-20251001"
-    return ""
+    return "o4-mini"
 
 
-def openai_base_url() -> str | None:
-    return os.environ.get("SUMMA_AI_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
+def _client():
+    from openai import OpenAI
+    return OpenAI(api_key=_api_key(), base_url=_base_url())
 
 
 def chat(system: str, user: str, *, json_mode: bool = False) -> str:
     provider = resolve_provider()
-    model = resolve_model(provider)
     if provider == "none":
         raise RuntimeError(
-            "Nenhuma API key configurada. Defina OPENAI_API_KEY ou ANTHROPIC_API_KEY (e opcionalmente SUMMA_AI_MODEL/SUMMA_AI_PROVIDER)."
+            "No AI credentials configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY "
+            "(or SUMMA_AI_BASE_URL for a local endpoint)."
         )
-    if provider == "openai":
-        from openai import OpenAI
-        client = OpenAI(api_key=openai_key() or "ollama", base_url=openai_base_url())
-        kwargs = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-        }
-        if json_mode:
-            kwargs["response_format"] = {"type": "json_object"}
+    model = resolve_model(provider)
+    client = _client()
+    kwargs = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+    }
+    if json_mode:
+        kwargs["response_format"] = {"type": "json_object"}
+    try:
         resp = client.chat.completions.create(**kwargs)
-        return resp.choices[0].message.content or ""
-    if provider == "anthropic":
-        import anthropic
-        client = anthropic.Anthropic(api_key=anthropic_key())
-        resp = client.messages.create(
-            model=model,
-            max_tokens=2048,
-            system=system,
-            messages=[{"role": "user", "content": user}],
-        )
-        out = []
-        for b in resp.content:
-            if getattr(b, "text", None):
-                out.append(b.text)
-        return "\n".join(out)
-    raise RuntimeError(f"Provider desconhecido: {provider}")
+    except Exception as e:
+        # Some providers (e.g. Ollama) do not support response_format.
+        if json_mode and "response_format" in str(e).lower():
+            kwargs.pop("response_format", None)
+            resp = client.chat.completions.create(**kwargs)
+        else:
+            raise
+    choice = resp.choices[0].message
+    return (choice.content if getattr(choice, "content", None) else "") or ""
 
 
 def categorize_transactions(txns: list[dict], categories: list[str]) -> list[dict]:
-    """Return list of {id, category} suggestions."""
     if not txns:
         return []
     lang = language_name(get_language())
@@ -99,12 +109,11 @@ def categorize_transactions(txns: list[dict], categories: list[str]) -> list[dic
         data = json.loads(raw)
         return data.get("items", [])
     except json.JSONDecodeError:
-        # try to extract json
         start = raw.find("{")
         end = raw.rfind("}")
         if start != -1 and end != -1:
             try:
-                data = json.loads(raw[start:end+1])
+                data = json.loads(raw[start:end + 1])
                 return data.get("items", [])
             except Exception:
                 return []
