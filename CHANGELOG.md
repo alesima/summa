@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI commands: `init`, `account`, `category`, `tx`, `budget`, `report`, `ask`, `chat`, `plan`, `review`.
 - SQLite local storage (`~/.summa/summa.db`) with accounts, categories, transactions, budgets, settings.
 - Default category seeding (expense/income).
-- Bank statement importers for CSV, OFX and PDF.
+- Bank statement importers for CSV, OFX and PDF (multi-page, with content-stream fallback).
 - AI integration (OpenAI / Anthropic / OpenAI-compatible endpoints) for categorization, Q&A, planning and review.
 - Conversation language selection (`summa lang`, `SUMMA_LANGUAGE`).
 - Multi-currency support: per-account currency, exchange rates (`summa fx`), auto transfer detection and dedup on import.

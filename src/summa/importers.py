@@ -144,6 +144,48 @@ def parse_ofx(path: Path) -> list[dict]:
 
 
 
+def _extract_text_fallback(page) -> str:
+    """Fallback text extraction from raw content streams (handles some tricky PDFs)."""
+    try:
+        contents = page.get_contents()
+        if contents is None:
+            return ""
+        data = contents.get_data() if hasattr(contents, "get_data") else (contents.get_object().get_data() if hasattr(contents, "get_object") else b"")
+    except Exception:
+        try:
+            data = page.get_contents().get_data()
+        except Exception:
+            return ""
+    if not data:
+        return ""
+    import re as _re, zlib
+    text = ""
+    # try zlib decompress if needed
+    try:
+        data = zlib.decompress(data)
+    except Exception:
+        pass
+    # find text-showing operators
+    for m in _re.finditer(rb"\((?:\.|[^()\])*\)\s*Tj", data):
+        seg = m.group(0)
+        try:
+            inner = seg[seg.find(b"(")+1:seg.rfind(b")")]
+            text += inner.decode("latin-1", errors="replace") + " "
+        except Exception:
+            pass
+    for m in _re.finditer(rb"\[(.*?)\]\s*TJ", data, _re.S):
+        seg = m.group(1)
+        for sm in _re.finditer(rb"\((?:\.|[^()\])*\)", seg):
+            try:
+                inner = sm.group(0)[1:-1]
+                text += inner.decode("latin-1", errors="replace")
+            except Exception:
+                pass
+        text += " "
+    return text
+
+
+
 def parse_pdf(path: Path) -> list[dict]:
     """Extract transactions from a PDF bank statement (best-effort text parsing)."""
     try:
@@ -154,13 +196,38 @@ def parse_pdf(path: Path) -> list[dict]:
     try:
         with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
             reader = PdfReader(str(path))
+            if getattr(reader, "is_encrypted", False):
+                try:
+                    reader.decrypt("")
+                except Exception:
+                    pass
     except Exception:
         return []
     text = ""
-    for page in reader.pages:
+    try:
+        n_pages = len(reader.pages)
+    except Exception:
+        n_pages = 0
+    date_re_local = re.compile(r"\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}|\d{4}[/\-]\d{1,2}[/\-]\d{1,2}|\d{8}")
+    for i in range(n_pages):
         try:
             with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
-                text += (page.extract_text() or "") + "\n"
+                page = reader.pages[i]
+                t = None
+                try:
+                    t = page.extract_text(extraction_mode="layout")
+                except TypeError:
+                    t = page.extract_text()
+                if not t:
+                    t = page.extract_text()
+            # if no dates found, try fallback extractor
+            if not t or not date_re_local.search(t or ""):
+                fb = _extract_text_fallback(page)
+                if fb and date_re_local.search(fb):
+                    t = fb
+                elif not t:
+                    t = fb
+            text += (t or "") + "\n"
         except Exception:
             continue
     if not text.strip():
