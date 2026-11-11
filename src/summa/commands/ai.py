@@ -96,6 +96,8 @@ def register(app: typer.Typer) -> None:
     def plan(
         goal: Optional[str] = typer.Option(None, "--goal", "-g", help="Goal, e.g. 'save 20% of income'."),
         months: int = typer.Option(3, "--months", "-m", help="Months of history to analyze."),
+        salary: Optional[float] = typer.Option(None, "--salary", help="Monthly salary/income for planning."),
+        context: Optional[str] = typer.Option(None, "--context", "-c", help="Extra context: family composition, fixed expenses, lifestyle, etc."),
     ):
         """Generate a financial plan with AI (analysis + budget suggestions)."""
         db.init()
@@ -125,14 +127,18 @@ def register(app: typer.Typer) -> None:
             "Monthly history:\n" + "\n".join(mt_lines) +
             "\n\nSpending by category (current month):\n" + "\n".join(cat_lines) +
             "\n\nCurrent budgets:\n" + ("\n".join(bud_lines) if bud_lines else "(none)") +
+            ("\n\n" + repo.memories_as_context() if repo.memories_as_context() else "") +
+            (f"\n\nMonthly salary/income: R$ {salary:.2f}" if salary is not None else "") +
+            (f"\n\nUser context: {context}" if context else "") +
             f"\n\nUser goal: {goal or 'improve financial health'}" +
             ("\n\n" + repo.graph_as_context() if repo.graph_as_context() else "")
         )
         lang = language_name(get_language())
         system = (
-            "You are a personal financial planner. Analyze the data and produce a practical, concise plan: "
-            "1) Situation diagnosis; 2) 3-5 priority actions; 3) Suggested budget per category (values in R$); "
-            "4) Monthly savings goal. Be realistic and specific. Do not invent data. "
+            "You are a personal financial planner. Analyze the data and the user context (family composition, "
+            "fixed expenses, lifestyle) and produce a practical, concise monthly plan: "
+            "1) Situation diagnosis; 2) Recommended allocation of salary across categories (values in R$); "
+            "3) 3-5 priority actions; 4) Monthly savings goal. Be realistic and specific. Do not invent data. "
             f"Respond in {lang}."
         )
         try:
