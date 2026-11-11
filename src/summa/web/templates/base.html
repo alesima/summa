@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
@@ -30,6 +32,12 @@
     tr:last-child { border-bottom: none; }
     .nav-link { color: var(--muted); transition: color 0.2s; display: block; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.9rem; }
     .nav-link:hover, .nav-link.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+    /* flatpickr theming */
+    .flatpickr-calendar { background: var(--card) !important; border: 1px solid var(--border) !important; color: var(--text) !important; }
+    .flatpickr-day { color: var(--text) !important; }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--accent) !important; border-color: var(--accent) !important; color: #fff !important; }
+    .flatpickr-months .flatpickr-month, .flatpickr-weekday { color: var(--text) !important; background: var(--card) !important; }
+    .flatpickr-current-month .flatpickr-monthDropdown-months, .flatpickr-current-month input.cur-year { color: var(--text) !important; }
     .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
   </style>
 </head>
@@ -104,6 +112,13 @@
       document.querySelectorAll('.md-content').forEach(function(el) {
         el.innerHTML = marked.parse(el.textContent);
       });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.flatpickr) {
+        flatpickr('input[type="date"]', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true });
+      }
     });
   </script>
 </body>
