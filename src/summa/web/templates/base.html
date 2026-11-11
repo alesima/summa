@@ -6,6 +6,7 @@
   <title>{% block title %}summa{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
@@ -78,6 +79,29 @@
     }
     function toggleTheme() { applyTheme(html.classList.contains('dark') ? 'light' : 'dark'); }
     applyTheme(localStorage.getItem('theme') || 'dark');
+  </script>
+
+  <!-- Loading overlay -->
+  <div id="loader" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(2px);">
+    <div class="flex flex-col items-center gap-3">
+      <div class="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style="border-color: var(--accent); border-top-color: transparent;"></div>
+      <div class="text-sm muted">Thinking...</div>
+    </div>
+  </div>
+  <script>
+    // Show loader on form submit
+    document.addEventListener('submit', function(e) {
+      const f = e.target;
+      if (f && f.tagName === 'FORM') {
+        document.getElementById('loader').classList.remove('hidden');
+      }
+    });
+    // Render markdown in .md-content
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.md-content').forEach(function(el) {
+        el.innerHTML = marked.parse(el.textContent);
+      });
+    });
   </script>
 </body>
 </html>
