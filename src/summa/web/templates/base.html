@@ -52,7 +52,7 @@
         {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
       </select>
       <button onclick="toggleTheme()" class="text-lg" aria-label="Toggle theme">
-        <span id="theme-icon">🌙</span>
+        <i id="theme-icon" class="fas fa-sun"></i>
       </button>
     </div>
     <nav class="px-3 pb-6">
@@ -80,7 +80,7 @@
   <!-- Mobile header -->
   <div class="md:hidden fixed top-0 left-0 right-0 z-20 border-b px-4 py-3 flex items-center justify-between" style="background: var(--card); border-color: var(--border);">
     <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
-    <button onclick="toggleTheme()" class="text-lg"><span id="theme-icon-m">🌙</span></button>
+    <button onclick="toggleTheme()" class="text-lg"><i id="theme-icon-m" class="fas fa-sun"></i></button>
   </div>
   <main class="flex-1 min-w-0 p-6 md:p-8 mt-14 md:mt-0">
     <div class="max-w-5xl mx-auto">
@@ -90,8 +90,8 @@
   <script>
     const html = document.documentElement;
     function applyTheme(t) {
-      if (t === 'dark') { html.classList.add('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>e.textContent='☀️'); }
-      else { html.classList.remove('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>e.textContent='🌙'); }
+      if (t === 'dark') { html.classList.add('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-moon'); e.classList.add('fa-sun'); }); }
+      else { html.classList.remove('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-sun'); e.classList.add('fa-moon'); }); }
       localStorage.setItem('theme', t);
     }
     function toggleTheme() { applyTheme(html.classList.contains('dark') ? 'light' : 'dark'); }
