@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Budgets - summa{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Budgets — {{ month }}</h1>
+<div class="card p-4">
+  <table>
+    <thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
+    <tbody>
+    {% for b in rows %}
+      <tr>
+        <td>{{ b.category }}</td>
+        <td>{{ "%.2f"|format(b.budget_cents/100) }}</td>
+        <td>{{ "%.2f"|format(b.spent_cents/100) }}</td>
+        <td class="{% if b.budget_cents and b.spent_cents > b.budget_cents %}text-red-400{% else %}text-green-400{% endif %}">{{ "%.2f"|format((b.budget_cents-b.spent_cents)/100) }}</td>
+        <td>{% if b.budget_cents %}{{ "%.0f"|format(b.spent_cents/b.budget_cents*100) }}%{% else %}-{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

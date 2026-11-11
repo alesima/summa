@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Web interface: `summa web` (FastAPI + Jinja2 + Tailwind) with dashboard, transactions, import, ask, budgets.
+
 ### Changed
 - All AI features now stream responses with a preloader (ChatGPT-style) and improved spacing.
 

@@ -92,6 +92,17 @@ def register(app: typer.Typer) -> None:
             cost = (tot[0] / 1e6) * price_input + (tot[1] / 1e6) * price_output
             console.print(f"Estimated cost: ${cost:.4f} USD")
 
+    @app.command("web")
+    def web_cmd(
+        host: str = typer.Option("127.0.0.1", "--host", "-h"),
+        port: int = typer.Option(8000, "--port", "-p"),
+    ):
+        """Launch the web interface."""
+        db.init()
+        from ..web.app import run_web
+        console.print(f"[green]Web UI running at http://{host}:{port}[/green]")
+        run_web(host=host, port=port)
+
     @app.command("dashboard")
     def dashboard_cmd():
         """Launch the interactive TUI dashboard."""

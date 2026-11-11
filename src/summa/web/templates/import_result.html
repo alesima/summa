@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Import result - summa{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Import result</h1>
+<div class="card p-6">
+  {% if result.duplicate_document %}
+    <p class="text-yellow-400">This document was already imported. Skipping.</p>
+  {% else %}
+    <p>File: {{ filename }}</p>
+    <p>Imported: <strong>{{ result.imported }}</strong> transactions</p>
+    <p>Skipped duplicates: {{ result.skipped }}</p>
+    {% if result.categorized %}<p>AI categorized: {{ result.categorized }}</p>{% endif %}
+  {% endif %}
+  <a href="/transactions" class="btn inline-block mt-4">View transactions</a>
+</div>
+{% endblock %}

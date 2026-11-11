@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Import - summa{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Import statement</h1>
+<div class="card p-6 max-w-lg">
+  <form action="/import" method="post" enctype="multipart/form-data" class="space-y-4">
+    <div>
+      <label class="block text-sm mb-1">Account</label>
+      <select class="inp" name="account">
+        {% for a in accounts %}<option value="{{ a.name }}">{{ a.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm mb-1">File (CSV/OFX/PDF)</label>
+      <input class="inp" type="file" name="file" required>
+    </div>
+    <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="categorize" value="true"> Auto-categorize with AI</label>
+    <button class="btn" type="submit">Import</button>
+  </form>
+</div>
+{% endblock %}

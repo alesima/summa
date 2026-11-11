@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Transactions - summa{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Transactions</h1>
+<form method="get" class="flex gap-2 mb-4 flex-wrap">
+  <select class="inp w-auto" name="account">
+    <option value="">All accounts</option>
+    {% for a in accounts %}<option value="{{ a.name }}" {% if account==a.name %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+  </select>
+  <input class="inp w-auto" name="start" type="date" value="{{ start or '' }}">
+  <input class="inp w-auto" name="end" type="date" value="{{ end or '' }}">
+  <button class="btn" type="submit">Filter</button>
+</form>
+<div class="card p-4">
+  <table>
+    <thead><tr><th>ID</th><th>Date</th><th>Account</th><th>Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
+    <tbody>
+    {% for t in rows %}
+      <tr>
+        <td>{{ t.id }}</td>
+        <td>{{ t.date }}</td>
+        <td>{{ t.account_name }}</td>
+        <td>{{ t.description }}</td>
+        <td>{{ t.category_name or '-' }}</td>
+        <td class="text-right {% if t.amount_cents > 0 %}text-green-400{% else %}text-red-400{% endif %}">{{ "%.2f"|format(t.amount_cents/100) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
