@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Dashboard - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Dashboard — {{ month }}</h1>
+<h1 class="text-2xl font-bold mb-6">{{ t("dashboard") }} — {{ month }}</h1>
 
 <!-- Summary cards -->
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
   <div class="card p-5">
-    <div class="text-xs muted uppercase tracking-wide mb-1">Income</div>
+    <div class="text-xs muted uppercase tracking-wide mb-1">{{ t("income") }}</div>
     <div class="text-2xl font-bold text-green-500">R$ {{ "%.2f"|format(mt.income_cents/100) }}</div>
   </div>
   <div class="card p-5">
-    <div class="text-xs muted uppercase tracking-wide mb-1">Expenses</div>
+    <div class="text-xs muted uppercase tracking-wide mb-1">{{ t("expenses") }}</div>
     <div class="text-2xl font-bold text-red-500">R$ {{ "%.2f"|format((mt.expense_cents|abs)/100) }}</div>
   </div>
   <div class="card p-5">
-    <div class="text-xs muted uppercase tracking-wide mb-1">Balance</div>
+    <div class="text-xs muted uppercase tracking-wide mb-1">{{ t("balance") }}</div>
     <div class="text-2xl font-bold">R$ {{ "%.2f"|format((mt.income_cents+mt.expense_cents)/100) }}</div>
   </div>
 </div>
@@ -52,7 +52,7 @@
       {% endfor %}
     </div>
     <div class="flex gap-4 mt-3 text-xs muted">
-      <span><span class="inline-block w-3 h-3 rounded" style="background:#22c55e"></span> Income</span>
+      <span><span class="inline-block w-3 h-3 rounded" style="background:#22c55e"></span> {{ t("income") }}</span>
       <span><span class="inline-block w-3 h-3 rounded" style="background:#ef4444"></span> Expense</span>
     </div>
   </div>
@@ -61,7 +61,7 @@
 <!-- Tables -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
   <div class="card p-5">
-    <h2 class="font-bold mb-3">Recent transactions</h2>
+    <h2 class="font-bold mb-3">{{ t("recent_transactions") }}</h2>
     <div id="tx-table" class="overflow-x-auto">
       <table>
         <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
@@ -79,7 +79,7 @@
     </div>
   </div>
   <div class="card p-5">
-    <h2 class="font-bold mb-3">Budget status</h2>
+    <h2 class="font-bold mb-3">{{ t("budget_status") }}</h2>
     <div class="overflow-x-auto">
       <table>
         <thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>Left</th></tr></thead>
@@ -98,9 +98,9 @@
   </div>
 </div>
 
-<!-- Add transaction -->
+<!-- {{ t("add_transaction") }} -->
 <div class="card p-5">
-  <h2 class="font-bold mb-4">Add transaction</h2>
+  <h2 class="font-bold mb-4">{{ t("add_transaction") }}</h2>
   <form hx-post="/transactions/add" hx-target="#tx-table" hx-swap="innerHTML" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
     <div>
       <label class="text-xs muted block mb-1">Amount</label>
@@ -108,7 +108,7 @@
     </div>
     <div class="md:col-span-2">
       <label class="text-xs muted block mb-1">Description</label>
-      <input class="inp" name="description" placeholder="Description" required>
+      <input class="inp" name="description" placeholder="{{ t('description') }}" required>
     </div>
     <div>
       <label class="text-xs muted block mb-1">Account</label>
@@ -124,8 +124,8 @@
       </select>
     </div>
     <div class="flex items-end gap-2">
-      <label class="flex items-center gap-2 text-sm muted"><input type="checkbox" name="income" value="true"> Income</label>
-      <button class="btn" type="submit">Add</button>
+      <label class="flex items-center gap-2 text-sm muted"><input type="checkbox" name="income" value="true"> {{ t("income") }}</label>
+      <button class="btn" type="submit">{{ t("add") }}</button>
     </div>
   </form>
 </div>

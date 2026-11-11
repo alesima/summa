@@ -46,29 +46,32 @@
   <aside class="w-60 shrink-0 border-r hidden md:block" style="background: var(--sidebar); border-color: var(--border);">
     <div class="p-5 flex items-center justify-between">
       <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
+      <select onchange="window.location='/set-lang?lang='+this.value" class="inp w-auto text-sm" style="width:auto;">
+        {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select>
       <button onclick="toggleTheme()" class="text-lg" aria-label="Toggle theme">
         <span id="theme-icon">🌙</span>
       </button>
     </div>
     <nav class="px-3 pb-6">
-      <div class="section-title">Overview</div>
-      <a href="/" class="nav-link">Dashboard</a>
-      <a href="/transactions" class="nav-link">Transactions</a>
-      <a href="/budgets" class="nav-link">Budgets</a>
-      <a href="/import" class="nav-link">Import</a>
-      <div class="section-title">AI</div>
-      <a href="/ask" class="nav-link">Ask AI</a>
+      <div class="section-title">{{ t("overview") }}</div>
+      <a href="/" class="nav-link">{{ t("dashboard") }}</a>
+      <a href="/transactions" class="nav-link">{{ t("transactions") }}</a>
+      <a href="/budgets" class="nav-link">{{ t("budgets") }}</a>
+      <a href="/import" class="nav-link">{{ t("import") }}</a>
+      <div class="section-title">{{ t("ai") }}</div>
+      <a href="/ask" class="nav-link">{{ t("ask_ai") }}</a>
       <a href="/plan" class="nav-link">Plan</a>
       <a href="/review" class="nav-link">Review</a>
-      <div class="section-title">Manage</div>
-      <a href="/accounts" class="nav-link">Accounts</a>
-      <a href="/categories" class="nav-link">Categories</a>
-      <a href="/memory" class="nav-link">Memory</a>
-      <a href="/graph" class="nav-link">Graph</a>
-      <a href="/fx" class="nav-link">FX rates</a>
-      <div class="section-title">Tools</div>
-      <a href="/usage" class="nav-link">Usage</a>
-      <a href="/export" class="nav-link">Export CSV</a>
+      <div class="section-title">{{ t("manage") }}</div>
+      <a href="/accounts" class="nav-link">{{ t("accounts") }}</a>
+      <a href="/categories" class="nav-link">{{ t("categories") }}</a>
+      <a href="/memory" class="nav-link">{{ t("memory") }}</a>
+      <a href="/graph" class="nav-link">{{ t("graph") }}</a>
+      <a href="/fx" class="nav-link">{{ t("fx_rates") }}</a>
+      <div class="section-title">{{ t("tools") }}</div>
+      <a href="/usage" class="nav-link">{{ t("usage") }}</a>
+      <a href="/export" class="nav-link">{{ t("export_csv") }}</a>
     </nav>
   </aside>
   <!-- Mobile header -->

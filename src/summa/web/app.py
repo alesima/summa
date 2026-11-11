@@ -17,6 +17,11 @@ from ..i18n import get_language, language_name
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+from .i18n import t as _t, available_languages
+from ..i18n import get_language, language_name
+
+templates.env.globals["t"] = _t
+templates.env.globals["available_languages"] = available_languages
 
 
 def _datefmt(value):
@@ -40,7 +45,17 @@ def _startup():
 
 
 def _ctx(request: Request, **kw):
-    return {"request": request, "lang": get_language(), "lang_name": language_name(get_language()), **kw}
+    # prefer settings language
+    try:
+        with db.db() as conn:
+            row = conn.execute("SELECT value FROM settings WHERE key='language'").fetchone()
+            if row:
+                import os
+                os.environ["SUMMA_LANGUAGE"] = row[0]
+    except Exception:
+        pass
+    lang = get_language()
+    return {"request": request, "lang": lang, "lang_name": language_name(lang), "t": _t, **kw}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -425,6 +440,26 @@ def chart_page(request: Request, month: str = None):
     maxv = max((d["total"] for d in data), default=1)
     return templates.TemplateResponse(request, "chart.html", _ctx(request, month=month, data=data, maxv=maxv))
 
+
+
+
+@app.get("/set-lang")
+def set_lang(lang: str, request: Request):
+    db.init()
+    try:
+        from .. import repo
+        repo.add_memory("__web_lang", lang, scope="web")
+    except Exception:
+        pass
+    # also persist in settings
+    try:
+        with db.db() as conn:
+            conn.execute("INSERT INTO settings(key,value) VALUES('language',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (lang,))
+    except Exception:
+        pass
+    import os
+    os.environ["SUMMA_LANGUAGE"] = lang
+    return RedirectResponse(request.headers.get("referer", "/"), status_code=303)
 
 
 def run_web(host: str = "127.0.0.1", port: int = 8000):
