@@ -36,28 +36,13 @@ def register(app: typer.Typer) -> None:
             mt_lines.append(f"{mm}: income R$ {mt['income_cents']/100.0:.2f}, expenses R$ {abs(mt['expense_cents'])/100.0:.2f}, balance R$ {(mt['income_cents']+mt['expense_cents'])/100.0:.2f}")
         context += "\n\nMonthly totals:\n" + "\n".join(mt_lines)
         try:
-            import sys
-            from rich.status import Status
             console.print()
-            full = ""
-            with Status("[bold cyan]Thinking...[/bold cyan]", console=console, spinner="dots") as status:
-                started = False
-                for chunk in ai.chat_stream(
-                    "You are a personal finance assistant. Answer the user's question based on the provided data. "
-                    "Be concise, use currency values (R$), and indicate when there is not enough data. "
-                    "Do not invent numbers. Respond in " + language_name(get_language()) + ".",
-                    [{"role": "user", "content": f"Question: {question}\n\nData:\n{context}"}],
-                ):
-                    if not started:
-                        status.stop()
-                        started = True
-                    full += chunk
-                    console.print(chunk, end="", soft_wrap=True)
-                    sys.stdout.flush()
-                if not started:
-                    status.stop()
-            console.print()
-            console.print()
+            ai.stream_to_console(
+                "You are a personal finance assistant. Answer the user's question based on the provided data. "
+                "Be concise, use currency values (R$), and indicate when there is not enough data. "
+                "Do not invent numbers. Respond in " + language_name(get_language()) + ".",
+                [{"role": "user", "content": f"Question: {question}\n\nData:\n{context}"}],
+            )
         except Exception as e:
             console.print(f"\n[red]AI error:[/red] {e}")
             raise typer.Exit(1)
@@ -89,24 +74,8 @@ def register(app: typer.Typer) -> None:
                 break
             history.append({"role": "user", "content": q})
             try:
-                from rich.status import Status
-                import sys
-                full = ""
-                # preloader while waiting for first token
                 console.print()
-                with Status("[bold cyan]Thinking...[/bold cyan]", console=console, spinner="dots") as status:
-                    started = False
-                    for chunk in ai.chat_stream(system, history):
-                        if not started:
-                            status.stop()
-                            started = True
-                        full += chunk
-                        console.print(chunk, end="", soft_wrap=True)
-                        sys.stdout.flush()
-                    if not started:
-                        status.stop()
-                console.print()
-                console.print()
+                full = ai.stream_to_console(system, history)
                 history.append({"role": "assistant", "content": full})
             except Exception as e:
                 console.print(f"\n[red]Error:[/red] {e}")
@@ -162,23 +131,8 @@ def register(app: typer.Typer) -> None:
             f"Respond in {lang}."
         )
         try:
-            import sys
-            from rich.status import Status
             console.print()
-            full = ""
-            with Status("[bold cyan]Thinking...[/bold cyan]", console=console, spinner="dots") as status:
-                started = False
-                for chunk in ai.chat_stream(system, [{"role": "user", "content": context}]):
-                    if not started:
-                        status.stop()
-                        started = True
-                    full += chunk
-                    console.print(chunk, end="", soft_wrap=True)
-                    sys.stdout.flush()
-                if not started:
-                    status.stop()
-            console.print()
-            console.print()
+            ai.stream_to_console(system, [{"role": "user", "content": context}])
         except Exception as e:
             console.print(f"\n[red]AI error:[/red] {e}")
             raise typer.Exit(1)
@@ -217,23 +171,8 @@ def register(app: typer.Typer) -> None:
             f"Respond in {lang}."
         )
         try:
-            import sys
-            from rich.status import Status
             console.print()
-            full = ""
-            with Status("[bold cyan]Thinking...[/bold cyan]", console=console, spinner="dots") as status:
-                started = False
-                for chunk in ai.chat_stream(system, [{"role": "user", "content": context}]):
-                    if not started:
-                        status.stop()
-                        started = True
-                    full += chunk
-                    console.print(chunk, end="", soft_wrap=True)
-                    sys.stdout.flush()
-                if not started:
-                    status.stop()
-            console.print()
-            console.print()
+            ai.stream_to_console(system, [{"role": "user", "content": context}])
         except Exception as e:
             console.print(f"\n[red]AI error:[/red] {e}")
             raise typer.Exit(1)

@@ -184,6 +184,37 @@ def chat_stream(system: str, messages: list[dict]):
         pass
 
 
+def stream_to_console(system: str, messages: list[dict]) -> str:
+    """Stream an AI response with a preloader and progressive Markdown rendering."""
+    import sys
+    from rich.live import Live
+    from rich.markdown import Markdown
+    from rich.status import Status
+
+    from .console import console
+
+    full = ""
+    # preloader until first token
+    with Status("[bold cyan]Thinking...[/bold cyan]", console=console, spinner="dots") as status:
+        started = False
+        live = None
+        for chunk in chat_stream(system, messages):
+            if not started:
+                status.stop()
+                started = True
+                live = Live(Markdown(""), console=console, refresh_per_second=8, vertical_overflow="visible")
+                live.start()
+            full += chunk
+            if live is not None:
+                live.update(Markdown(full))
+        if not started:
+            status.stop()
+        if live is not None:
+            live.stop()
+    console.print()
+    return full
+
+
 
 def categorize_transactions(txns: list[dict], categories: list[str]) -> list[dict]:
     if not txns:
