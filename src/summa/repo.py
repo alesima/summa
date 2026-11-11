@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import Optional
 
 from .db import db
+from . import db as dbmod
 from .models import Account, Category, Transaction, Budget
 
 
@@ -245,7 +246,7 @@ def record_imported_document(file_hash: str, filename: str, account_id: int, cou
 
 # ---------- Memories ----------
 def add_memory(key: str, value: str, scope: str = "global") -> int:
-    db.init()
+    dbmod.init()
     with db() as conn:
         cur = conn.execute(
             """INSERT INTO memories(key, value, scope) VALUES (?,?,?)
@@ -274,7 +275,7 @@ def get_memory(key: str) -> Optional[dict]:
 
 
 def delete_memory(key: str) -> bool:
-    db.init()
+    dbmod.init()
     with db() as conn:
         cur = conn.execute("DELETE FROM memories WHERE key=?", (key,))
         return cur.rowcount > 0
@@ -290,7 +291,7 @@ def memories_as_context() -> str:
 
 # ---------- Knowledge graph (triples) ----------
 def add_triple(subject: str, predicate: str, object_: str, confidence: float = 1.0) -> int:
-    db.init()
+    dbmod.init()
     with db() as conn:
         cur = conn.execute(
             """INSERT INTO graph_triples(subject, predicate, object, confidence) VALUES (?,?,?,?)
@@ -320,7 +321,7 @@ def list_triples(subject: Optional[str] = None, predicate: Optional[str] = None,
 
 
 def delete_triple(subject: str, predicate: str, object_: str) -> bool:
-    db.init()
+    dbmod.init()
     with db() as conn:
         cur = conn.execute(
             "DELETE FROM graph_triples WHERE subject=? AND predicate=? AND object=?",
