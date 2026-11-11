@@ -483,6 +483,23 @@ def export_csv(account: str = None, start: str = None, end: str = None):
     return Response(content=buf.getvalue(), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=summa_export.csv"})
 
 
+
+@app.get("/v1/models")
+def openai_models():
+    from .. import ai
+    model = ai.resolve_model(ai.resolve_provider())
+    return {"object": "list", "data": [{"id": model, "object": "model", "owned_by": "summa"}]}
+
+
+@app.get("/models", response_class=HTMLResponse)
+def models_page(request: Request):
+    db.init()
+    from .. import ai
+    provider = ai.resolve_provider()
+    model = ai.resolve_model(provider)
+    return templates.TemplateResponse(request, "models.html", _ctx(request, provider=provider, model=model))
+
+
 def run_web(host: str = "127.0.0.1", port: int = 8000):
     import uvicorn
     uvicorn.run(app, host=host, port=port)

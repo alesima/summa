@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Models - summa{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">AI Model</h1>
+<div class="card p-6 max-w-lg">
+  <p class="mb-2"><span class="muted">Provider:</span> <strong>{{ provider }}</strong></p>
+  <p class="mb-4"><span class="muted">Model:</span> <strong>{{ model }}</strong></p>
+  <p class="text-sm muted">Configure via <code>SUMMA_AI_PROVIDER</code>, <code>SUMMA_AI_MODEL</code>, <code>OPENAI_API_KEY</code>, etc. in <code>~/.summa/.env</code>.</p>
+  <p class="text-sm muted mt-2">OpenAI-compatible endpoint: <code>/v1/models</code>, <code>/v1/chat/completions</code>.</p>
+</div>
+{% endblock %}
