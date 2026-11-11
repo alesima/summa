@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Ask AI - summa{% endblock %}
+{% block title %}{{ t('ask_ai') }} - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Ask AI</h1>
+<h1 class="text-2xl font-bold mb-6">{{ t('ask_ai') }}</h1>
 <div class="card p-6">
   <form method="post" class="space-y-4">
-    <textarea class="inp" name="question" rows="3" placeholder="Ask about your finances...">{{ question or '' }}</textarea>
-    <button class="btn" type="submit">Ask</button>
+    <textarea class="inp" name="question" rows="3" placeholder="{{ t('ask') }} about your finances...">{{ question or '' }}</textarea>
+    <button class="btn" type="submit">{{ t('ask') }}</button>
   </form>
   {% if answer %}
   <div class="mt-6 p-4 bg-slate-900 rounded-lg whitespace-pre-wrap">{{ answer }}</div>

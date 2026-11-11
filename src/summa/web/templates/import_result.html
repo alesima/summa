@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Import result - summa{% endblock %}
+{% block title %}{{ t('import_result') }} - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Import result</h1>
+<h1 class="text-2xl font-bold mb-6">{{ t('import_result') }}</h1>
 <div class="card p-6">
   {% if result.duplicate_document %}
-    <p class="text-yellow-400">This document was already imported. Skipping.</p>
+    <p class="text-yellow-400">{{ t('already_imported') }}</p>
   {% else %}
     <p>File: {{ filename }}</p>
-    <p>Imported: <strong>{{ result.imported }}</strong> transactions</p>
-    <p>Skipped duplicates: {{ result.skipped }}</p>
-    {% if result.categorized %}<p>AI categorized: {{ result.categorized }}</p>{% endif %}
+    <p>{{ t('import') }}ed: <strong>{{ result.imported }}</strong> transactions</p>
+    <p>{{ t('skipped_duplicates') }}: {{ result.skipped }}</p>
+    {% if result.categorized %}<p>{{ t('ai_categorized') }}: {{ result.categorized }}</p>{% endif %}
   {% endif %}
-  <a href="/transactions" class="btn inline-block mt-4">View transactions</a>
+  <a href="/transactions" class="btn inline-block mt-4">{{ t('view_transactions') }}</a>
 </div>
 {% endblock %}

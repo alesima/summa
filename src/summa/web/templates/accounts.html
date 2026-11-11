@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Accounts - summa{% endblock %}
+{% block title %}{{ t('accounts') }} - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Accounts</h1>
+<h1 class="text-2xl font-bold mb-6">{{ t('accounts') }}</h1>
 <div class="card p-4 mb-6">
   <table>
     <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Currency</th><th></th></tr></thead>
@@ -9,19 +9,19 @@
     {% for a in rows %}
       <tr>
         <td>{{ a.id }}</td><td>{{ a.name }}</td><td>{{ a.type }}</td><td>{{ a.currency }}</td>
-        <td><form method="post" action="/accounts/remove" style="display:inline"><input type="hidden" name="name" value="{{ a.name }}"><button class="btn-ghost text-sm" type="submit">Remove</button></form></td>
+        <td><form method="post" action="/accounts/remove" style="display:inline"><input type="hidden" name="name" value="{{ a.name }}"><button class="btn-ghost text-sm" type="submit">{{ t('remove') }}</button></form></td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 <div class="card p-6 max-w-lg">
-  <h2 class="font-bold mb-3">Add account</h2>
+  <h2 class="font-bold mb-3">{{ t('add_account') }}</h2>
   <form method="post" action="/accounts/add" class="space-y-3">
     <input class="inp" name="name" placeholder="Name" required>
     <select class="inp" name="type"><option>checking</option><option>savings</option><option>credit</option><option>cash</option><option>investment</option></select>
     <input class="inp" name="currency" value="BRL" placeholder="Currency">
-    <button class="btn" type="submit">Add</button>
+    <button class="btn" type="submit">{{ t('add') }}</button>
   </form>
 </div>
 {% endblock %}

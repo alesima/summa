@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Graph - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Knowledge graph</h1>
+<h1 class="text-2xl font-bold mb-6">{{ t('knowledge_graph') }}</h1>
 <div class="flex gap-2 mb-4">
-  <form method="post" action="/graph/sync"><button class="btn" type="submit">Sync from data</button></form>
-  <form method="post" action="/graph/clear"><button class="btn-ghost" type="submit">Clear</button></form>
+  <form method="post" action="/graph/sync"><button class="btn" type="submit">{{ t('sync_from_data') }}</button></form>
+  <form method="post" action="/graph/clear"><button class="btn-ghost" type="submit">{{ t('clear') }}</button></form>
 </div>
 <div class="card p-4">
   <table>
-    <thead><tr><th>Subject</th><th>Predicate</th><th>Object</th><th>Confidence</th></tr></thead>
+    <thead><tr><th>{{ t('subject') }}</th><th>{{ t('predicate') }}</th><th>{{ t('object') }}</th><th>{{ t('confidence') }}</th></tr></thead>
     <tbody>
     {% for r in rows %}
       <tr><td>{{ r.subject }}</td><td>{{ r.predicate }}</td><td>{{ r.object }}</td><td>{{ "%.2f"|format(r.confidence) }}</td></tr>
     {% endfor %}
     </tbody>
   </table>
-  {% if not rows %}<p class="muted p-4">No triples. Click "Sync from data".</p>{% endif %}
+  {% if not rows %}<p class="muted p-4">No triples. Click "{{ t('sync_from_data') }}".</p>{% endif %}
 </div>
 {% endblock %}

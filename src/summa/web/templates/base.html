@@ -129,7 +129,7 @@
   <div id="loader" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(2px);">
     <div class="flex flex-col items-center gap-3">
       <div class="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style="border-color: var(--accent); border-top-color: transparent;"></div>
-      <div class="text-sm muted">Thinking...</div>
+      <div class="text-sm muted">{{ t('thinking') }}</div>
     </div>
   </div>
   <script>
@@ -160,9 +160,9 @@
       document.querySelectorAll('.fmt-date').forEach(function(el) {
         const iso = el.getAttribute('data-iso');
         if (!iso) return;
-        const d = new Date(iso + 'T00:00:00');
+        const d = new {{ t('date') }}(iso + 'T00:00:00');
         if (isNaN(d.getTime())) return;
-        try { el.textContent = d.toLocaleDateString(); } catch (e) {}
+        try { el.textContent = d.toLocale{{ t('date') }}String(); } catch (e) {}
       });
     });
   </script>

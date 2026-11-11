@@ -1,27 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Memory - summa{% endblock %}
+{% block title %}{{ t('memory') }} - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Memory</h1>
+<h1 class="text-2xl font-bold mb-6">{{ t('memory') }}</h1>
 <div class="card p-4 mb-6">
   <table>
-    <thead><tr><th>Key</th><th>Value</th><th>Scope</th><th></th></tr></thead>
+    <thead><tr><th>{{ t('key') }}</th><th>{{ t('value') }}</th><th>{{ t('scope') }}</th><th></th></tr></thead>
     <tbody>
     {% for m in rows %}
       <tr>
         <td>{{ m.key }}</td><td>{{ m.value }}</td><td>{{ m.scope }}</td>
-        <td><form method="post" action="/memory/remove" style="display:inline"><input type="hidden" name="key" value="{{ m.key }}"><button class="btn-ghost text-sm" type="submit">Remove</button></form></td>
+        <td><form method="post" action="/memory/remove" style="display:inline"><input type="hidden" name="key" value="{{ m.key }}"><button class="btn-ghost text-sm" type="submit">{{ t('remove') }}</button></form></td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 <div class="card p-6 max-w-lg">
-  <h2 class="font-bold mb-3">Add memory</h2>
+  <h2 class="font-bold mb-3">{{ t('add_memory') }}</h2>
   <form method="post" action="/memory/add" class="space-y-3">
-    <input class="inp" name="key" placeholder="Key" required>
-    <input class="inp" name="value" placeholder="Value" required>
-    <input class="inp" name="scope" value="global" placeholder="Scope">
-    <button class="btn" type="submit">Save</button>
+    <input class="inp" name="key" placeholder="{{ t('key') }}" required>
+    <input class="inp" name="value" placeholder="{{ t('value') }}" required>
+    <input class="inp" name="scope" value="global" placeholder="{{ t('scope') }}">
+    <button class="btn" type="submit">{{ t('save') }}</button>
   </form>
 </div>
 {% endblock %}

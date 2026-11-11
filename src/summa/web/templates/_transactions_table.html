@@ -1,5 +1,5 @@
 <table>
-  <thead><tr><th>ID</th><th>Date</th><th>Account</th><th class="description">Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
+  <thead><tr><th>ID</th><th>{{ t('date') }}</th><th>{{ t('account') }}</th><th class="description">{{ t('description') }}</th><th>{{ t('category') }}</th><th class="text-right">{{ t('amount') }}</th></tr></thead>
   <tbody>
   {% for t in rows %}
     <tr>

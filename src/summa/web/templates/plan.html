@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Plan - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">AI financial plan</h1>
+<h1 class="text-2xl font-bold mb-6">{{ t('ai_financial_plan') }}</h1>
 <div class="card p-6 mb-6">
   <form method="post" action="/plan" class="space-y-3">
-    <input class="inp" name="salary" type="number" step="0.01" placeholder="Monthly salary">
-    <input class="inp" name="context" placeholder="Context: family composition, fixed expenses, lifestyle...">
-    <input class="inp" name="goal" placeholder="Goal (optional)">
-    <button class="btn" type="submit">Generate plan</button>
+    <input class="inp" name="salary" type="number" step="0.01" placeholder="{{ t('monthly_salary') }}">
+    <input class="inp" name="context" placeholder="{{ t('context') }}: family composition, fixed expenses, lifestyle...">
+    <input class="inp" name="goal" placeholder="{{ t('goal') }} (optional)">
+    <button class="btn" type="submit">{{ t('generate_plan') }}</button>
   </form>
 </div>
 {% if answer %}

@@ -22,7 +22,7 @@
 <!-- Charts -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
   <div class="card p-5">
-    <h2 class="font-bold mb-4">Spending by category</h2>
+    <h2 class="font-bold mb-4">{{ t('spending_by_category') }}</h2>
     {% set ns = namespace(maxv=1) %}
     {% for d in chart_data %}{% if d.total > ns.maxv %}{% set ns.maxv = d.total %}{% endif %}{% endfor %}
     {% for d in chart_data %}
@@ -34,10 +34,10 @@
       <div class="w-16 text-right text-xs font-mono">{{ "%.0f"|format(d.total) }}</div>
     </div>
     {% endfor %}
-    {% if not chart_data %}<p class="muted text-sm">No spending data.</p>{% endif %}
+    {% if not chart_data %}<p class="muted text-sm">{{ t('no_spending_data') }}</p>{% endif %}
   </div>
   <div class="card p-5">
-    <h2 class="font-bold mb-4">Monthly trend (6 months)</h2>
+    <h2 class="font-bold mb-4">{{ t('monthly_trend') }}</h2>
     {% set ns2 = namespace(maxv=1) %}
     {% for r in trend_data %}{% if r.income > ns2.maxv %}{% set ns2.maxv = r.income %}{% endif %}{% if r.expense > ns2.maxv %}{% set ns2.maxv = r.expense %}{% endif %}{% endfor %}
     <div class="flex items-end gap-2 h-40">
@@ -64,7 +64,7 @@
     <h2 class="font-bold mb-3">{{ t("recent_transactions") }}</h2>
     <div id="tx-table" class="overflow-x-auto">
       <table>
-        <thead><tr><th>Date</th><th class="description">Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
+        <thead><tr><th>{{ t('date') }}</th><th class="description">{{ t('description') }}</th><th>{{ t('category') }}</th><th class="text-right">{{ t('amount') }}</th></tr></thead>
         <tbody>
         {% for t in txns %}
           <tr>
@@ -82,7 +82,7 @@
     <h2 class="font-bold mb-3">{{ t("budget_status") }}</h2>
     <div class="overflow-x-auto">
       <table>
-        <thead><tr><th>Category</th><th>Budget</th><th>Spent</th><th>Left</th></tr></thead>
+        <thead><tr><th>{{ t('category') }}</th><th>Budget</th><th>Spent</th><th>Left</th></tr></thead>
         <tbody>
         {% for b in budgets %}
           <tr>
@@ -103,21 +103,21 @@
   <h2 class="font-bold mb-4">{{ t("add_transaction") }}</h2>
   <form hx-post="/transactions/add" hx-target="#tx-table" hx-swap="innerHTML" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
     <div>
-      <label class="text-xs muted block mb-1">Amount</label>
+      <label class="text-xs muted block mb-1">{{ t('amount') }}</label>
       <input class="inp" name="amount" type="number" step="0.01" placeholder="0.00" required>
     </div>
     <div class="md:col-span-2">
-      <label class="text-xs muted block mb-1">Description</label>
+      <label class="text-xs muted block mb-1">{{ t('description') }}</label>
       <input class="inp" name="description" placeholder="{{ t('description') }}" required>
     </div>
     <div>
-      <label class="text-xs muted block mb-1">Account</label>
+      <label class="text-xs muted block mb-1">{{ t('account') }}</label>
       <select class="inp" name="account">
         {% for a in accounts %}<option value="{{ a.name }}">{{ a.name }}</option>{% endfor %}
       </select>
     </div>
     <div>
-      <label class="text-xs muted block mb-1">Category</label>
+      <label class="text-xs muted block mb-1">{{ t('category') }}</label>
       <select class="inp" name="category">
         <option value="">—</option>
         {% for c in cats %}<option value="{{ c.name }}">{{ c.name }}</option>{% endfor %}
