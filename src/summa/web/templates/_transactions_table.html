@@ -1,0 +1,15 @@
+<table>
+  <thead><tr><th>ID</th><th>Date</th><th>Account</th><th>Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
+  <tbody>
+  {% for t in rows %}
+    <tr>
+      <td>{{ t.id }}</td>
+      <td>{{ t.date }}</td>
+      <td>{{ t.account_name }}</td>
+      <td>{{ t.description }}</td>
+      <td>{{ t.category_name or '-' }}</td>
+      <td class="text-right {% if t.amount_cents > 0 %}text-green-400{% else %}text-red-400{% endif %}">{{ "%.2f"|format(t.amount_cents/100) }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>

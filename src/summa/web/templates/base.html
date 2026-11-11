@@ -5,16 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}summa{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
   <style>
-    :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --accent: #16a34a; }
-    .dark { --bg: #0b1220; --card: #111827; --text: #e5e7eb; --muted: #94a3b8; --border: #1f2937; --accent: #22c55e; }
+    :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --accent: #16a34a; --sidebar: #ffffff; }
+    .dark { --bg: #0b1220; --card: #111827; --text: #e5e7eb; --muted: #94a3b8; --border: #1f2937; --accent: #22c55e; --sidebar: #0f172a; }
     body { background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; }
-    .btn { background: var(--accent); color: #fff; padding: 0.5rem 1.25rem; border-radius: 0.625rem; font-weight: 600; transition: opacity 0.2s; }
+    .btn { background: var(--accent); color: #fff; padding: 0.5rem 1.25rem; border-radius: 0.625rem; font-weight: 600; transition: opacity 0.2s; display: inline-block; }
     .btn:hover { opacity: 0.9; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.9rem; border-radius: 0.5rem; }
     .inp { background: var(--bg); border: 1px solid var(--border); border-radius: 0.625rem; padding: 0.5rem 0.75rem; color: var(--text); width: 100%; }
     .muted { color: var(--muted); }
     table { width: 100%; border-collapse: collapse; }
@@ -22,42 +24,59 @@
     th { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
     tr { border-bottom: 1px solid var(--border); }
     tr:last-child { border-bottom: none; }
-    .nav-link { color: var(--muted); transition: color 0.2s; }
-    .nav-link:hover { color: var(--accent); }
+    .nav-link { color: var(--muted); transition: color 0.2s; display: block; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.9rem; }
+    .nav-link:hover, .nav-link.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+    .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
   </style>
 </head>
-<body class="min-h-screen antialiased">
-  <nav class="sticky top-0 z-10 backdrop-blur border-b" style="background: color-mix(in srgb, var(--card) 80%, transparent); border-color: var(--border);">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-8">
-        <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
-        <div class="flex gap-5 text-sm">
-          <a href="/" class="nav-link">Dashboard</a>
-          <a href="/transactions" class="nav-link">Transactions</a>
-          <a href="/budgets" class="nav-link">Budgets</a>
-          <a href="/import" class="nav-link">Import</a>
-          <a href="/ask" class="nav-link">Ask AI</a>
-        </div>
-      </div>
-      <button onclick="toggleTheme()" class="text-xl" aria-label="Toggle theme">
+<body class="min-h-screen antialiased flex">
+  <!-- Sidebar -->
+  <aside class="w-60 shrink-0 border-r hidden md:block" style="background: var(--sidebar); border-color: var(--border);">
+    <div class="p-5 flex items-center justify-between">
+      <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
+      <button onclick="toggleTheme()" class="text-lg" aria-label="Toggle theme">
         <span id="theme-icon">🌙</span>
       </button>
     </div>
-  </nav>
-  <main class="max-w-6xl mx-auto px-6 py-8">
-    {% block content %}{% endblock %}
+    <nav class="px-3 pb-6">
+      <div class="section-title">Overview</div>
+      <a href="/" class="nav-link">Dashboard</a>
+      <a href="/transactions" class="nav-link">Transactions</a>
+      <a href="/budgets" class="nav-link">Budgets</a>
+      <a href="/import" class="nav-link">Import</a>
+      <div class="section-title">AI</div>
+      <a href="/ask" class="nav-link">Ask AI</a>
+      <a href="/plan" class="nav-link">Plan</a>
+      <a href="/review" class="nav-link">Review</a>
+      <div class="section-title">Manage</div>
+      <a href="/accounts" class="nav-link">Accounts</a>
+      <a href="/categories" class="nav-link">Categories</a>
+      <a href="/memory" class="nav-link">Memory</a>
+      <a href="/graph" class="nav-link">Graph</a>
+      <a href="/fx" class="nav-link">FX rates</a>
+      <div class="section-title">Tools</div>
+      <a href="/usage" class="nav-link">Usage</a>
+      <a href="/export" class="nav-link">Export CSV</a>
+    </nav>
+  </aside>
+  <!-- Mobile header -->
+  <div class="md:hidden fixed top-0 left-0 right-0 z-20 border-b px-4 py-3 flex items-center justify-between" style="background: var(--card); border-color: var(--border);">
+    <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
+    <button onclick="toggleTheme()" class="text-lg"><span id="theme-icon-m">🌙</span></button>
+  </div>
+  <main class="flex-1 min-w-0 p-6 md:p-8 mt-14 md:mt-0">
+    <div class="max-w-5xl mx-auto">
+      {% block content %}{% endblock %}
+    </div>
   </main>
   <script>
     const html = document.documentElement;
-    const icon = document.getElementById('theme-icon');
     function applyTheme(t) {
-      if (t === 'dark') { html.classList.add('dark'); icon.textContent = '☀️'; }
-      else { html.classList.remove('dark'); icon.textContent = '🌙'; }
+      if (t === 'dark') { html.classList.add('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>e.textContent='☀️'); }
+      else { html.classList.remove('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>e.textContent='🌙'); }
       localStorage.setItem('theme', t);
     }
-    function toggleTheme() {
-      applyTheme(html.classList.contains('dark') ? 'light' : 'dark');
-    }
+    function toggleTheme() { applyTheme(html.classList.contains('dark') ? 'light' : 'dark'); }
     applyTheme(localStorage.getItem('theme') || 'dark');
   </script>
 </body>

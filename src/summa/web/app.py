@@ -60,6 +60,7 @@ def transactions(request: Request, account: str = None, start: str = None, end: 
 
 @app.post("/transactions/add")
 def add_transaction(
+    request: Request,
     amount: float = Form(...),
     description: str = Form(...),
     account: str = Form(None),
@@ -70,21 +71,24 @@ def add_transaction(
     db.init()
     accounts = repo.list_accounts()
     acc = repo.get_account(account) if account else (accounts[0] if accounts else None)
-    if not acc:
-        return RedirectResponse("/transactions", status_code=303)
-    d = date_str or date.today().isoformat()
-    cents = models.to_cents(amount)
-    cents = abs(cents) if income else -abs(cents)
-    cat_id = None
-    if category:
-        cat = repo.get_category(category)
-        if cat:
-            cat_id = cat["id"]
-    tx = models.Transaction(
-        account_id=acc["id"], date=date.fromisoformat(d), amount_cents=cents,
-        description=description, category_id=cat_id,
-    )
-    repo.add_transaction(tx)
+    if acc:
+        d = date_str or date.today().isoformat()
+        cents = models.to_cents(amount)
+        cents = abs(cents) if income else -abs(cents)
+        cat_id = None
+        if category:
+            cat = repo.get_category(category)
+            if cat:
+                cat_id = cat["id"]
+        tx = models.Transaction(
+            account_id=acc["id"], date=date.fromisoformat(d), amount_cents=cents,
+            description=description, category_id=cat_id,
+        )
+        repo.add_transaction(tx)
+    # HTMX partial response
+    if request.headers.get("HX-Request"):
+        rows = repo.list_transactions(limit=15)
+        return templates.TemplateResponse(request, "_transactions_table.html", {"request": request, "rows": rows})
     return RedirectResponse("/transactions", status_code=303)
 
 
@@ -164,6 +168,229 @@ def budgets(request: Request, month: str = None):
         month = date.today().strftime("%Y-%m")
     rows = repo.budget_status(month)
     return templates.TemplateResponse(request, "budgets.html", _ctx(request, month=month, rows=rows, from_cents=models.from_cents))
+
+
+
+
+@app.get("/accounts", response_class=HTMLResponse)
+def accounts_page(request: Request):
+    db.init()
+    rows = repo.list_accounts()
+    return templates.TemplateResponse(request, "accounts.html", _ctx(request, rows=rows))
+
+
+@app.post("/accounts/add")
+def accounts_add(name: str = Form(...), type: str = Form("checking"), currency: str = Form("BRL")):
+    db.init()
+    try:
+        repo.add_account(models.Account(name=name, type=type, currency=currency))
+    except Exception:
+        pass
+    return RedirectResponse("/accounts", status_code=303)
+
+
+@app.post("/accounts/remove")
+def accounts_remove(name: str = Form(...)):
+    db.init()
+    repo.delete_account(name)
+    return RedirectResponse("/accounts", status_code=303)
+
+
+@app.get("/categories", response_class=HTMLResponse)
+def categories_page(request: Request):
+    db.init()
+    rows = repo.list_categories()
+    return templates.TemplateResponse(request, "categories.html", _ctx(request, rows=rows))
+
+
+@app.post("/categories/add")
+def categories_add(name: str = Form(...), kind: str = Form("expense")):
+    db.init()
+    try:
+        repo.add_category(models.Category(name=name, kind=kind))
+    except Exception:
+        pass
+    return RedirectResponse("/categories", status_code=303)
+
+
+@app.get("/memory", response_class=HTMLResponse)
+def memory_page(request: Request):
+    db.init()
+    rows = repo.list_memories()
+    return templates.TemplateResponse(request, "memory.html", _ctx(request, rows=rows))
+
+
+@app.post("/memory/add")
+def memory_add(key: str = Form(...), value: str = Form(...), scope: str = Form("global")):
+    db.init()
+    repo.add_memory(key, value, scope)
+    return RedirectResponse("/memory", status_code=303)
+
+
+@app.post("/memory/remove")
+def memory_remove(key: str = Form(...)):
+    db.init()
+    repo.delete_memory(key)
+    return RedirectResponse("/memory", status_code=303)
+
+
+@app.get("/graph", response_class=HTMLResponse)
+def graph_page(request: Request):
+    db.init()
+    rows = repo.list_triples()
+    return templates.TemplateResponse(request, "graph.html", _ctx(request, rows=rows))
+
+
+@app.post("/graph/sync")
+def graph_sync():
+    db.init()
+    from ..services.graph_service import sync_from_data
+    sync_from_data()
+    return RedirectResponse("/graph", status_code=303)
+
+
+@app.post("/graph/clear")
+def graph_clear():
+    db.init()
+    with db.db() as conn:
+        conn.execute("DELETE FROM graph_triples")
+    return RedirectResponse("/graph", status_code=303)
+
+
+@app.get("/fx", response_class=HTMLResponse)
+def fx_page(request: Request):
+    db.init()
+    with db.db() as conn:
+        rows = conn.execute("SELECT * FROM fx_rates ORDER BY base_currency, quote_currency").fetchall()
+    rows = [dict(r) for r in rows]
+    return templates.TemplateResponse(request, "fx.html", _ctx(request, rows=rows))
+
+
+@app.post("/fx/set")
+def fx_set(base: str = Form(...), quote: str = Form(...), rate: float = Form(...)):
+    db.init()
+    with db.db() as conn:
+        conn.execute(
+            """INSERT INTO fx_rates(base_currency, quote_currency, rate) VALUES (?,?,?)
+               ON CONFLICT(base_currency, quote_currency) DO UPDATE SET rate=excluded.rate, updated_at=datetime('now')""",
+            (base.upper(), quote.upper(), rate),
+        )
+    return RedirectResponse("/fx", status_code=303)
+
+
+@app.get("/usage", response_class=HTMLResponse)
+def usage_page(request: Request):
+    db.init()
+    with db.db() as conn:
+        rows = conn.execute("SELECT model, COALESCE(SUM(prompt_tokens),0) AS p, COALESCE(SUM(completion_tokens),0) AS c, COALESCE(SUM(total_tokens),0) AS t, COUNT(*) AS n FROM token_usage GROUP BY model").fetchall()
+        tot = conn.execute("SELECT COALESCE(SUM(prompt_tokens),0), COALESCE(SUM(completion_tokens),0), COALESCE(SUM(total_tokens),0), COUNT(*) FROM token_usage").fetchone()
+    rows = [dict(r) for r in rows]
+    return templates.TemplateResponse(request, "usage.html", _ctx(request, rows=rows, tot=tot))
+
+
+@app.get("/plan", response_class=HTMLResponse)
+def plan_page(request: Request):
+    db.init()
+    return templates.TemplateResponse(request, "plan.html", _ctx(request))
+
+
+@app.post("/plan", response_class=HTMLResponse)
+def plan_submit(request: Request, salary: float = Form(None), context: str = Form(None), goal: str = Form(None)):
+    db.init()
+    txns = repo.list_transactions(limit=200)
+    lines = [f"{t['date']} | {t['description']} | {t['category_name'] or '-'} | {t['amount_cents']/100.0:.2f}" for t in txns]
+    ctx = "Transactions:\n" + "\n".join(lines)
+    from datetime import date as _d
+    today = _d.today()
+    months = []
+    for i in range(3):
+        m = today.month - i; y = today.year
+        while m <= 0:
+            m += 12; y -= 1
+        months.append(f"{y:04d}-{m:02d}")
+    mt_lines = []
+    for mm in months:
+        mt = repo.monthly_totals(mm)
+        mt_lines.append(f"{mm}: income R$ {mt['income_cents']/100.0:.2f}, expenses R$ {abs(mt['expense_cents'])/100.0:.2f}")
+    ctx += "\n\nMonthly totals:\n" + "\n".join(mt_lines)
+    mem = repo.memories_as_context()
+    graph = repo.graph_as_context()
+    extra = "\n\n".join(x for x in (mem, graph) if x)
+    if extra:
+        ctx += "\n\n" + extra
+    if salary is not None:
+        ctx += f"\n\nMonthly salary/income: R$ {salary:.2f}"
+    if context:
+        ctx += f"\n\nUser context: {context}"
+    ctx += f"\n\nUser goal: {goal or 'improve financial health'}"
+    from ..i18n import get_language, language_name
+    system = ("You are a personal financial planner. Analyze the data and user context and produce a practical monthly plan. "
+              "Respond in " + language_name(get_language()) + ".")
+    try:
+        answer = ai.answer_question("Generate a monthly financial plan.", ctx) if False else None
+        # use chat for full plan
+        answer = ai.chat(system, f"Context:\n{ctx}")
+    except Exception as e:
+        answer = f"Error: {e}"
+    return templates.TemplateResponse(request, "plan.html", _ctx(request, salary=salary, context=context, goal=goal, answer=answer))
+
+
+@app.get("/review", response_class=HTMLResponse)
+def review_page(request: Request, month: str = None):
+    db.init()
+    if not month:
+        month = date.today().strftime("%Y-%m")
+    mt = repo.monthly_totals(month)
+    y, m = month.split("-")
+    import calendar
+    last = calendar.monthrange(int(y), int(m))[1]
+    start = f"{month}-01"; end = f"{month}-{last:02d}"
+    cat_rows = repo.summary_by_category(start=start, end=end)
+    cat_lines = [f"{r['category'] or '(uncategorized)'}: R$ {r['total_cents']/100.0:.2f}" for r in cat_rows]
+    txns = repo.list_transactions(start=start, end=end, limit=50)
+    exp = sorted([t for t in txns if t["amount_cents"] < 0], key=lambda t: t["amount_cents"])[:10]
+    exp_lines = [f"{t['date']} {t['description']}: R$ {t['amount_cents']/100.0:.2f}" for t in exp]
+    context = (f"Month: {month}\nIncome: R$ {mt['income_cents']/100.0:.2f}\nExpenses: R$ {abs(mt['expense_cents'])/100.0:.2f}\n"
+               f"Balance: R$ {(mt['income_cents']+mt['expense_cents'])/100.0:.2f}\nTransactions: {mt['count']}\n\n"
+               "By category:\n" + "\n".join(cat_lines) + "\n\nLargest expenses:\n" + "\n".join(exp_lines))
+    from ..i18n import get_language, language_name
+    system = ("You are a personal financial analyst. Review the month: highlights, where most was spent, alerts, and 3 improvement suggestions. Concise. "
+              "Respond in " + language_name(get_language()) + ".")
+    try:
+        answer = ai.chat(system, context)
+    except Exception as e:
+        answer = f"Error: {e}"
+    return templates.TemplateResponse(request, "review.html", _ctx(request, month=month, answer=answer))
+
+
+@app.get("/export")
+def export_csv(account: str = None, start: str = None, end: str = None):
+    db.init()
+    rows = repo.list_transactions(account=account, start=start, end=end, limit=100000)
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["id", "date", "account", "description", "category", "amount", "notes"])
+    for r in rows:
+        w.writerow([r["id"], r["date"], r["account_name"], r["description"], r["category_name"] or "", r["amount_cents"]/100.0, r.get("notes") or ""])
+    from fastapi.responses import Response
+    return Response(content=buf.getvalue(), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=summa_export.csv"})
+
+
+@app.get("/chart", response_class=HTMLResponse)
+def chart_page(request: Request, month: str = None):
+    db.init()
+    if not month:
+        month = date.today().strftime("%Y-%m")
+    y, m = month.split("-")
+    import calendar
+    last = calendar.monthrange(int(y), int(m))[1]
+    start = f"{month}-01"; end = f"{month}-{last:02d}"
+    rows = repo.summary_by_category(start=start, end=end)
+    data = [{"category": r["category"] or "(uncategorized)", "total": abs(r["total_cents"])/100.0} for r in rows if (r["total_cents"] or 0) < 0]
+    data.sort(key=lambda x: x["total"], reverse=True)
+    maxv = max((d["total"] for d in data), default=1)
+    return templates.TemplateResponse(request, "chart.html", _ctx(request, month=month, data=data, maxv=maxv))
+
 
 
 def run_web(host: str = "127.0.0.1", port: int = 8000):

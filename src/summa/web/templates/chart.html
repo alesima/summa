@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Chart - summa{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Spending by category — {{ month }}</h1>
+<div class="card p-6">
+  {% for d in data %}
+  <div class="flex items-center gap-3 mb-2">
+    <div class="w-40 text-sm truncate">{{ d.category }}</div>
+    <div class="flex-1 bg-slate-700 rounded h-4 overflow-hidden">
+      <div style="width: {{ (d.total/maxv*100) if maxv else 0 }}%; background: var(--accent); height: 100%;"></div>
+    </div>
+    <div class="w-20 text-right text-sm">{{ "%.2f"|format(d.total) }}</div>
+  </div>
+  {% endfor %}
+  {% if not data %}<p class="muted">No spending data.</p>{% endif %}
+</div>
+{% endblock %}

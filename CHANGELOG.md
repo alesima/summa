@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Web UI now supports HTMX for partial updates (add transaction without full reload).
+
+### Added
 - Web interface: `summa web` (FastAPI + Jinja2 + Tailwind) with dashboard, transactions, import, ask, budgets.
 
 ### Changed
