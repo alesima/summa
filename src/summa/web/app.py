@@ -40,8 +40,29 @@ def index(request: Request, month: str = None):
     txns = repo.list_transactions(limit=15)
     budgets = repo.budget_status(month)
     cats = repo.list_categories()
+    # chart data
+    y, m = month.split("-")
+    import calendar
+    last = calendar.monthrange(int(y), int(m))[1]
+    start = f"{month}-01"; end = f"{month}-{last:02d}"
+    rows = repo.summary_by_category(start=start, end=end)
+    chart_data = [{"category": r["category"] or "(uncategorized)", "total": abs(r["total_cents"])/100.0} for r in rows if (r["total_cents"] or 0) < 0]
+    chart_data.sort(key=lambda x: x["total"], reverse=True)
+    # trend data (6 months)
+    from datetime import date as _d
+    today = _d.today()
+    trend_data = []
+    for i in range(5, -1, -1):
+        mm = today.month - i
+        yy = today.year
+        while mm <= 0:
+            mm += 12; yy -= 1
+        mstr = f"{yy:04d}-{mm:02d}"
+        mt2 = repo.monthly_totals(mstr)
+        trend_data.append({"month": mstr, "income": mt2["income_cents"]/100.0, "expense": abs(mt2["expense_cents"])/100.0})
     return templates.TemplateResponse(request, "index.html", _ctx(
         request, month=month, accounts=accounts, mt=mt, txns=txns, budgets=budgets, cats=cats,
+        chart_data=chart_data, trend_data=trend_data,
         from_cents=models.from_cents,
     ))
 
