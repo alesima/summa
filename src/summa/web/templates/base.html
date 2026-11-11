@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}summa{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2322c55e%22/><text x=%2250%22 y=%2272%22 font-size=%2264%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui,sans-serif%22 font-weight=%22800%22>S</text></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
@@ -55,23 +57,24 @@
     </div>
     <nav class="px-3 pb-6">
       <div class="section-title">{{ t("overview") }}</div>
-      <a href="/" class="nav-link">{{ t("dashboard") }}</a>
-      <a href="/transactions" class="nav-link">{{ t("transactions") }}</a>
-      <a href="/budgets" class="nav-link">{{ t("budgets") }}</a>
-      <a href="/import" class="nav-link">{{ t("import") }}</a>
+      <a href="/" class="nav-link"><i class="fas fa-chart-line mr-2 w-4"></i>{{ t("dashboard") }}</a>
+      <a href="/transactions" class="nav-link"><i class="fas fa-receipt mr-2 w-4"></i>{{ t("transactions") }}</a>
+      <a href="/budgets" class="nav-link"><i class="fas fa-wallet mr-2 w-4"></i>{{ t("budgets") }}</a>
+      <a href="/import" class="nav-link"><i class="fas fa-file-import mr-2 w-4"></i>{{ t("import") }}</a>
       <div class="section-title">{{ t("ai") }}</div>
-      <a href="/ask" class="nav-link">{{ t("ask_ai") }}</a>
-      <a href="/plan" class="nav-link">Plan</a>
-      <a href="/review" class="nav-link">Review</a>
+      <a href="/ask" class="nav-link"><i class="fas fa-comments mr-2 w-4"></i>{{ t("ask_ai") }}</a>
+      <a href="/plan" class="nav-link"><i class="fas fa-bullseye mr-2 w-4"></i>{{ t("plan") }}</a>
+      <a href="/review" class="nav-link"><i class="fas fa-clipboard-check mr-2 w-4"></i>{{ t("review") }}</a>
       <div class="section-title">{{ t("manage") }}</div>
-      <a href="/accounts" class="nav-link">{{ t("accounts") }}</a>
-      <a href="/categories" class="nav-link">{{ t("categories") }}</a>
-      <a href="/memory" class="nav-link">{{ t("memory") }}</a>
-      <a href="/graph" class="nav-link">{{ t("graph") }}</a>
-      <a href="/fx" class="nav-link">{{ t("fx_rates") }}</a>
+      <a href="/accounts" class="nav-link"><i class="fas fa-university mr-2 w-4"></i>{{ t("accounts") }}</a>
+      <a href="/categories" class="nav-link"><i class="fas fa-tags mr-2 w-4"></i>{{ t("categories") }}</a>
+      <a href="/memory" class="nav-link"><i class="fas fa-brain mr-2 w-4"></i>{{ t("memory") }}</a>
+      <a href="/graph" class="nav-link"><i class="fas fa-project-diagram mr-2 w-4"></i>{{ t("graph") }}</a>
+      <a href="/fx" class="nav-link"><i class="fas fa-exchange-alt mr-2 w-4"></i>{{ t("fx_rates") }}</a>
       <div class="section-title">{{ t("tools") }}</div>
-      <a href="/usage" class="nav-link">{{ t("usage") }}</a>
-      <a href="/export" class="nav-link">{{ t("export_csv") }}</a>
+      <a href="/usage" class="nav-link"><i class="fas fa-chart-bar mr-2 w-4"></i>{{ t("usage") }}</a>
+      <a href="/export" class="nav-link"><i class="fas fa-download mr-2 w-4"></i>{{ t("export_csv") }}</a>
+      <a href="/chart" class="nav-link"><i class="fas fa-chart-pie mr-2 w-4"></i>{{ t("chart") }}</a>
     </nav>
   </aside>
   <!-- Mobile header -->
@@ -122,6 +125,18 @@
       if (window.flatpickr) {
         flatpickr('input[type="date"]', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true });
       }
+    });
+  </script>
+  <script>
+    // Format dates according to browser locale
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.fmt-date').forEach(function(el) {
+        const iso = el.getAttribute('data-iso');
+        if (!iso) return;
+        const d = new Date(iso + 'T00:00:00');
+        if (isNaN(d.getTime())) return;
+        try { el.textContent = d.toLocaleDateString(); } catch (e) {}
+      });
     });
   </script>
 </body>
