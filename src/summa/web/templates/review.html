@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Review - summa{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">{{ t('monthly_review') }} — {{ month }}</h1>
-<div class="card p-6">
-  <div class="md-content">{{ answer }}</div>
+<h1 class="text-2xl font-bold mb-6">Monthly review — {{ month }}</h1>
+<div class="flex gap-2 mb-4">
+  <a href="/review?month={{ month }}" class="btn-ghost text-sm">Reload</a>
+</div>
+<div class="card p-6" id="review-result" hx-get="/review/run?month={{ month }}" hx-trigger="load" hx-indicator="#review-spinner">
+  <div id="review-spinner" class="flex items-center gap-3 muted">
+    <div class="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style="border-color: var(--accent); border-top-color: transparent;"></div>
+    <span>Thinking...</span>
+  </div>
 </div>
 {% endblock %}

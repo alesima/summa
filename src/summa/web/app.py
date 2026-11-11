@@ -376,16 +376,66 @@ def plan_submit(request: Request, salary: float = Form(None), context: str = For
     system = ("You are a personal financial planner. Analyze the data and user context and produce a practical monthly plan. "
               "Respond in " + language_name(get_language()) + ".")
     try:
-        answer = ai.answer_question("Generate a monthly financial plan.", ctx) if False else None
-        # use chat for full plan
-        answer = ai.chat(system, f"Context:\n{ctx}")
+        answer = ai.chat(system, ctx)
     except Exception as e:
         answer = f"Error: {e}"
-    return templates.TemplateResponse(request, "plan.html", _ctx(request, salary=salary, context=context, goal=goal, answer=answer))
+    return templates.TemplateResponse(request, "_answer.html", {"request": request, "answer": answer})
+
+
+
+
+@app.get("/plan/run", response_class=HTMLResponse)
+def plan_run(request: Request, salary: str = "", context: str = "", goal: str = ""):
+    db.init()
+    txns = repo.list_transactions(limit=200)
+    lines = [f"{t['date']} | {t['description']} | {t['category_name'] or '-'} | {t['amount_cents']/100.0:.2f}" for t in txns]
+    ctx = "Transactions:\n" + "\n".join(lines)
+    from datetime import date as _d
+    today = _d.today()
+    months = []
+    for i in range(3):
+        m = today.month - i; y = today.year
+        while m <= 0:
+            m += 12; y -= 1
+        months.append(f"{y:04d}-{m:02d}")
+    mt_lines = []
+    for mm in months:
+        mt = repo.monthly_totals(mm)
+        mt_lines.append(f"{mm}: income R$ {mt['income_cents']/100.0:.2f}, expenses R$ {abs(mt['expense_cents'])/100.0:.2f}")
+    ctx += "\n\nMonthly totals:\n" + "\n".join(mt_lines)
+    mem = repo.memories_as_context()
+    graph = repo.graph_as_context()
+    extra = "\n\n".join(x for x in (mem, graph) if x)
+    if extra:
+        ctx += "\n\n" + extra
+    if salary:
+        try:
+            ctx += f"\n\nMonthly salary/income: R$ {float(salary):.2f}"
+        except Exception:
+            pass
+    if context:
+        ctx += f"\n\nUser context: {context}"
+    ctx += f"\n\nUser goal: {goal or 'improve financial health'}"
+    from ..i18n import get_language, language_name
+    system = ("You are a personal financial planner. Analyze the data and user context and produce a practical monthly plan. "
+              "Respond in " + language_name(get_language()) + ".")
+    try:
+        answer = ai.chat(system, ctx)
+    except Exception as e:
+        answer = f"Error: {e}"
+    return templates.TemplateResponse(request, "_answer.html", {"request": request, "answer": answer})
 
 
 @app.get("/review", response_class=HTMLResponse)
 def review_page(request: Request, month: str = None):
+    db.init()
+    if not month:
+        month = date.today().strftime("%Y-%m")
+    return templates.TemplateResponse(request, "review.html", _ctx(request, month=month))
+
+
+@app.get("/review/run", response_class=HTMLResponse)
+def review_run(request: Request, month: str = None):
     db.init()
     if not month:
         month = date.today().strftime("%Y-%m")
@@ -409,7 +459,7 @@ def review_page(request: Request, month: str = None):
         answer = ai.chat(system, context)
     except Exception as e:
         answer = f"Error: {e}"
-    return templates.TemplateResponse(request, "review.html", _ctx(request, month=month, answer=answer))
+    return templates.TemplateResponse(request, "_answer.html", {"request": request, "answer": answer})
 
 
 @app.get("/export")
