@@ -46,6 +46,14 @@ def _to_float(s: str) -> Optional[float]:
         return None
 
 
+
+SKIP_KEYWORDS = ("saldo", "balance", "total do dia", "total geral")
+
+
+def is_noise(description: str) -> bool:
+    d = (description or "").lower()
+    return any(kw in d for kw in SKIP_KEYWORDS)
+
 def parse_csv(path: Path) -> list[dict]:
     rows_out = []
     with open(path, newline="", encoding="utf-8-sig") as f:
@@ -92,6 +100,8 @@ def parse_csv(path: Path) -> list[dict]:
         if not d:
             continue
         desc = r[desc_idx].strip() if desc_idx < len(r) else ""
+        if is_noise(desc):
+            continue
         amount = None
         if amt_idx is not None and amt_idx < len(r):
             amount = _to_float(r[amt_idx])
@@ -128,6 +138,8 @@ def parse_ofx(path: Path) -> list[dict]:
         dt = get("DTPOSTED") or get("DTUSER")
         amt = get("TRNAMT")
         memo = get("MEMO") or get("NAME") or ""
+        if is_noise(memo):
+            continue
         if dt is None or amt is None:
             continue
         d = _parse_date(dt)
@@ -266,6 +278,8 @@ def parse_pdf(path: Path) -> list[dict]:
         desc = line.replace(mdate.group(1), "", 1)
         desc = desc.replace(str(amt_candidates[-1] if amt_candidates else ""), "", 1) if amt_candidates else desc
         desc = " ".join(desc.split())
+        if is_noise(desc):
+            continue
         if not desc:
             desc = "(no description)"
         out.append({"date": d, "description": desc, "amount": amount, "raw": line})
