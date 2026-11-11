@@ -131,17 +131,31 @@
     function toggleTheme() { applyTheme(html.classList.contains('dark') ? 'light' : 'dark'); }
     applyTheme(localStorage.getItem('theme') || 'dark');
     document.addEventListener('submit', function(e) { const f = e.target; if (f && f.tagName === 'FORM') document.getElementById('loader').classList.remove('hidden'); });
-    document.addEventListener('DOMContentLoaded', function() {
+    function renderMarkdown() {
+      document.querySelectorAll('.md-content').forEach(function(el) {
+        if (el.dataset.rendered) return;
+        el.innerHTML = marked.parse(el.textContent);
+        el.dataset.rendered = '1';
+      });
+    }
+    function formatDates() {
       document.querySelectorAll('.fmt-date').forEach(function(el) {
+        if (el.dataset.fmt) return;
         const iso = el.getAttribute('data-iso');
         if (!iso) return;
         const d = new Date(iso + 'T00:00:00');
         if (isNaN(d.getTime())) return;
-        try { el.textContent = d.toLocaleDateString(); } catch (e) {}
+        try { el.textContent = d.toLocaleDateString(); el.dataset.fmt = '1'; } catch (e) {}
       });
-      document.querySelectorAll('.md-content').forEach(function(el) { el.innerHTML = marked.parse(el.textContent); });
-      if (window.flatpickr) flatpickr('input[type="date"]', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true });
-    });
+    }
+    function initAll() {
+      formatDates();
+      renderMarkdown();
+      if (window.flatpickr) flatpickr('input[type="date"]:not(.flatpickr-input)', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true });
+    }
+    document.addEventListener('DOMContentLoaded', initAll);
+    // Re-render after HTMX swaps
+    document.addEventListener('htmx:afterSwap', function() { setTimeout(initAll, 0); });
   </script>
 </body>
 </html>
