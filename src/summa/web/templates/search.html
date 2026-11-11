@@ -8,7 +8,7 @@
     <tbody>
     {% for t in rows %}
       <tr>
-        <td class="text-sm"><span class="fmt-date" data-iso="{{ t.date }}">{{ t.date }}</span></td>
+        <td class="text-sm"><span class="fmt-date" data-iso="{{ t.date }}">{{ t.date|datefmt }}</span></td>
         <td class="text-sm">{{ t.account_name }}</td>
         <td class="description text-sm">{{ t.description }}</td>
         <td class="text-sm muted">{{ t.category_name or '-' }}</td>

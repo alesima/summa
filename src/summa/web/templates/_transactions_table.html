@@ -4,7 +4,7 @@
   {% for t in rows %}
     <tr>
       <td>{{ t.id }}</td>
-      <td><span class="fmt-date" data-iso="{{ t.date }}">{{ t.date }}</span></td>
+      <td><span class="fmt-date" data-iso="{{ t.date }}">{{ t.date|datefmt }}</span></td>
       <td>{{ t.account_name }}</td>
       <td class="description">{{ t.description }}</td>
       <td>{{ t.category_name or '-' }}</td>
