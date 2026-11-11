@@ -284,10 +284,10 @@ def memory_remove(key: str = Form(...)):
 
 
 @app.get("/graph", response_class=HTMLResponse)
-def graph_page(request: Request):
+def graph_page(request: Request, subject: str = None, predicate: str = None):
     db.init()
-    rows = repo.list_triples()
-    return templates.TemplateResponse(request, "graph.html", _ctx(request, rows=rows))
+    rows = repo.list_triples(subject=subject, predicate=predicate)
+    return templates.TemplateResponse(request, "graph.html", _ctx(request, rows=rows, subject=subject, predicate=predicate))
 
 
 @app.post("/graph/sync")
@@ -537,6 +537,21 @@ def search_page(request: Request, q: str = ""):
                 or ql in (t.get("category_name") or "").lower()
                 or ql in (t.get("account_name") or "").lower()]
     return templates.TemplateResponse(request, "search.html", _ctx(request, q=q, rows=rows, from_cents=models.from_cents))
+
+
+
+@app.post("/graph/add")
+def graph_add(subject: str = Form(...), predicate: str = Form(...), object: str = Form(...)):
+    db.init()
+    repo.add_triple(subject, predicate, object)
+    return RedirectResponse("/graph", status_code=303)
+
+
+@app.post("/graph/remove")
+def graph_remove(subject: str = Form(...), predicate: str = Form(...), object: str = Form(...)):
+    db.init()
+    repo.delete_triple(subject, predicate, object)
+    return RedirectResponse("/graph", status_code=303)
 
 
 def run_web(host: str = "127.0.0.1", port: int = 8000):

@@ -1,20 +1,79 @@
 {% extends "base.html" %}
-{% block title %}Graph - summa{% endblock %}
+{% block title %}{{ t('graph') }} - summa{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold mb-6">{{ t('knowledge_graph') }}</h1>
-<div class="flex gap-2 mb-4">
-  <form method="post" action="/graph/sync"><button class="btn" type="submit">{{ t('sync_from_data') }}</button></form>
-  <form method="post" action="/graph/clear"><button class="btn-ghost" type="submit">{{ t('clear') }}</button></form>
+
+<!-- Stats -->
+<div class="grid grid-cols-3 gap-3 mb-6">
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold" style="color: var(--accent);">{{ rows|length }}</div>
+    <div class="text-xs muted">Triples</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold" style="color: var(--accent);">{{ rows|map(attribute='subject')|unique|list|length }}</div>
+    <div class="text-xs muted">Subjects</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold" style="color: var(--accent);">{{ rows|map(attribute='predicate')|unique|list|length }}</div>
+    <div class="text-xs muted">Predicates</div>
+  </div>
 </div>
-<div class="card p-4">
-  <table>
-    <thead><tr><th>{{ t('subject') }}</th><th>{{ t('predicate') }}</th><th>{{ t('object') }}</th><th>{{ t('confidence') }}</th></tr></thead>
-    <tbody>
-    {% for r in rows %}
-      <tr><td>{{ r.subject }}</td><td>{{ r.predicate }}</td><td>{{ r.object }}</td><td>{{ "%.2f"|format(r.confidence) }}</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% if not rows %}<p class="muted p-4">No triples. Click "{{ t('sync_from_data') }}".</p>{% endif %}
+
+<!-- Actions -->
+<div class="flex flex-wrap gap-2 mb-6">
+  <form method="post" action="/graph/sync"><button class="btn" type="submit"><i class="fas fa-sync mr-1"></i> {{ t('sync_from_data') }}</button></form>
+  <form method="post" action="/graph/clear" onsubmit="return confirm('Clear all triples?')"><button class="btn-ghost" type="submit"><i class="fas fa-trash mr-1"></i> {{ t('clear') }}</button></form>
+</div>
+
+<!-- Filter -->
+<form method="get" action="/graph" class="flex gap-2 mb-4 flex-wrap">
+  <input class="inp w-auto" name="subject" placeholder="{{ t('subject') }}" value="{{ request.query_params.get('subject','') }}">
+  <input class="inp w-auto" name="predicate" placeholder="{{ t('predicate') }}" value="{{ request.query_params.get('predicate','') }}">
+  <button class="btn" type="submit">{{ t('filter') }}</button>
+</form>
+
+<!-- Triples grouped by subject -->
+<div class="space-y-4">
+  {% set groups = {} %}
+  {% for r in rows %}
+    {% if r.subject not in groups %}{% set _ = groups.update({r.subject: []}) %}{% endif %}
+    {% set _ = groups[r.subject].append(r) %}
+  {% endfor %}
+  {% for subj, rels in groups.items() %}
+  <div class="card p-4">
+    <div class="flex items-center gap-2 mb-3">
+      <i class="fas fa-circle text-xs" style="color: var(--accent);"></i>
+      <span class="font-bold">{{ subj }}</span>
+      <span class="text-xs muted">({{ rels|length }})</span>
+    </div>
+    <div class="pl-4 space-y-1">
+      {% for r in rels %}
+      <div class="flex items-center gap-2 text-sm">
+        <span class="muted">--{{ r.predicate }}--></span>
+        <span class="font-medium">{{ r.object }}</span>
+        <span class="text-xs muted ml-auto">{{ "%.2f"|format(r.confidence) }}</span>
+        <form method="post" action="/graph/remove" style="display:inline" class="ml-2">
+          <input type="hidden" name="subject" value="{{ r.subject }}">
+          <input type="hidden" name="predicate" value="{{ r.predicate }}">
+          <input type="hidden" name="object" value="{{ r.object }}">
+          <button class="text-xs muted hover:text-red-400" type="submit"><i class="fas fa-times"></i></button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  {% if not rows %}<div class="card p-8 text-center muted">{{ t('no_triples') }}</div>{% endif %}
+</div>
+
+<!-- Add triple manually -->
+<div class="card p-6 mt-6 max-w-2xl">
+  <h2 class="font-bold mb-3">Add triple</h2>
+  <form method="post" action="/graph/add" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
+    <input class="inp" name="subject" placeholder="{{ t('subject') }}" required>
+    <input class="inp" name="predicate" placeholder="{{ t('predicate') }}" required>
+    <input class="inp" name="object" placeholder="{{ t('object') }}" required>
+    <button class="btn" type="submit">{{ t('add') }}</button>
+  </form>
 </div>
 {% endblock %}
