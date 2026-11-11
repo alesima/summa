@@ -81,6 +81,13 @@ CREATE TABLE IF NOT EXISTS graph_triples (
     UNIQUE(subject, predicate, object)
 );
 
+CREATE TABLE IF NOT EXISTS merchant_aliases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    raw TEXT NOT NULL UNIQUE,
+    clean TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS token_usage (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model TEXT NOT NULL,

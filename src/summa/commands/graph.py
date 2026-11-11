@@ -92,6 +92,37 @@ def register(app: typer.Typer) -> None:
         preds = {r["predicate"] for r in rows}
         console.print(f"Triples: {len(rows)} | Subjects: {len(subjects)} | Predicates: {len(preds)}")
 
+    @graph_app.command("alias")
+    def graph_alias(action: str = typer.Argument(..., help="add|list|remove"),
+                   raw: Optional[str] = typer.Argument(None),
+                   clean: Optional[str] = typer.Argument(None)):
+        """Manage merchant aliases (raw -> clean)."""
+        db.init()
+        if action == "add":
+            if not raw or not clean:
+                console.print("[red]Usage: graph alias add <raw> <clean>[/red]")
+                raise typer.Exit(1)
+            repo.add_alias(raw, clean)
+            console.print(f"[green]Alias added:[/green] '{raw}' -> '{clean}'")
+        elif action == "list":
+            rows = repo.list_aliases()
+            t = Table("Raw", "Clean")
+            for r in rows:
+                t.add_row(r["raw"], r["clean"])
+            console.print(t if rows else "No aliases.")
+        elif action == "remove":
+            if not raw:
+                console.print("[red]Usage: graph alias remove <raw>[/red]")
+                raise typer.Exit(1)
+            if repo.delete_alias(raw):
+                console.print(f"[green]Removed alias:[/green] {raw}")
+            else:
+                console.print(f"[red]Not found.[/red]")
+                raise typer.Exit(1)
+        else:
+            console.print("[red]Unknown action. Use add|list|remove.[/red]")
+            raise typer.Exit(1)
+
     @graph_app.command("remove")
     def graph_remove(subject: str, predicate: str, obj: str):
         """Remove a triple."""

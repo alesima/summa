@@ -7,11 +7,43 @@ from typing import Optional
 from .. import repo
 
 
+# Common prefixes that indicate payment method, not merchant (BR bank statements).
+DEFAULT_PREFIXES = [
+    "PIX QRS", "PIX TRANSF", "PIX", "PAY", "PAG BOLETO", "PAGAMENTO", "PAG",
+    "RSHOP", "RSCSS", "INT PRE-PAGO", "REND PAGO", "SALDO DO DIA",
+]
+
+
 def normalize_merchant(description: str) -> str:
-    """Strip trailing dates/numbers to collapse repeated merchants."""
+    """Normalize a raw statement description into a merchant name.
+
+    1. Check user-defined aliases.
+    2. Strip common payment-method prefixes.
+    3. Strip trailing date-like tokens.
+    """
     d = (description or "").strip()
+    if not d:
+        return ""
+    # strip known prefixes first
+    upper = d.upper()
+    for pref in sorted(DEFAULT_PREFIXES, key=len, reverse=True):
+        if upper.startswith(pref + " ") or upper == pref:
+            d = d[len(pref):].strip()
+            upper = d.upper()
+            break
+    # strip trailing date-like tokens
     d = re.sub(r"\s+\d{1,2}[\/\.\-]\d{1,2}(?:[\/\.\-]\d{2,4})?\s*$", "", d)
-    return " ".join(d.split())
+    d = " ".join(d.split())
+    # user alias (checked on normalized candidate and original)
+    try:
+        from .. import repo
+        for cand in (d, (description or "").strip()):
+            alias = repo.resolve_alias(cand)
+            if alias:
+                return alias
+    except Exception:
+        pass
+    return d
 
 
 def sync_from_data() -> dict:

@@ -336,3 +336,45 @@ def graph_as_context(subject: Optional[str] = None) -> str:
         return ""
     lines = [f"- {r['subject']} {r['predicate']} {r['object']} (conf {r['confidence']:.2f})" for r in rows]
     return "Knowledge graph:\n" + "\n".join(lines)
+
+
+# ---------- Merchant aliases ----------
+def add_alias(raw: str, clean: str) -> None:
+    with db() as conn:
+        conn.execute(
+            """INSERT INTO merchant_aliases(raw, clean) VALUES (?,?)
+               ON CONFLICT(raw) DO UPDATE SET clean=excluded.clean""",
+            (raw, clean),
+        )
+
+
+def list_aliases() -> list[dict]:
+    try:
+        with db() as conn:
+            rows = conn.execute("SELECT * FROM merchant_aliases ORDER BY raw").fetchall()
+            return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+def delete_alias(raw: str) -> bool:
+    dbmod.init()
+    with db() as conn:
+        cur = conn.execute("DELETE FROM merchant_aliases WHERE raw=?", (raw,))
+        return cur.rowcount > 0
+
+
+def resolve_alias(description: str) -> Optional[str]:
+    """Return cleaned name if an alias exists, else None."""
+    try:
+        with db() as conn:
+            row = conn.execute("SELECT clean FROM merchant_aliases WHERE raw=?", (description,)).fetchone()
+            if row:
+                return row["clean"]
+            # try normalized raw
+            row = conn.execute("SELECT clean FROM merchant_aliases WHERE raw=?", (description.strip(),)).fetchone()
+            if row:
+                return row["clean"]
+    except Exception:
+        pass
+    return None
