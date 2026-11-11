@@ -103,6 +103,18 @@ def register(app: typer.Typer) -> None:
         console.print(f"[green]Web UI running at http://{host}:{port}[/green]")
         run_web(host=host, port=port)
 
+    @app.command("health")
+    def health_cmd():
+        """Check system health."""
+        db.init()
+        try:
+            with db.db() as conn:
+                conn.execute("SELECT 1")
+            console.print("[green]OK[/green] — database reachable.")
+        except Exception as e:
+            console.print(f"[red]Error:[/red] {e}")
+            raise typer.Exit(1)
+
     @app.command("dashboard")
     def dashboard_cmd():
         """Launch the interactive TUI dashboard."""

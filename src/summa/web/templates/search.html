@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Search - summa{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Search: "{{ q }}"</h1>
+<div class="card p-4">
+  <table>
+    <thead><tr><th>Date</th><th>Account</th><th>Description</th><th>Category</th><th class="text-right">Amount</th></tr></thead>
+    <tbody>
+    {% for t in rows %}
+      <tr>
+        <td class="text-sm"><span class="fmt-date" data-iso="{{ t.date }}">{{ t.date }}</span></td>
+        <td class="text-sm">{{ t.account_name }}</td>
+        <td class="description text-sm">{{ t.description }}</td>
+        <td class="text-sm muted">{{ t.category_name or '-' }}</td>
+        <td class="text-right text-sm font-mono {% if t.amount_cents > 0 %}text-green-500{% else %}text-red-500{% endif %}">{{ "%.2f"|format(t.amount_cents/100) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if q and not rows %}<p class="muted p-4">No results.</p>{% endif %}
+  {% if not q %}<p class="muted p-4">Type a query in the search box.</p>{% endif %}
+</div>
+{% endblock %}

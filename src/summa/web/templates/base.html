@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}summa{% endblock %}</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2322c55e%22/><text x=%2250%22 y=%2272%22 font-size=%2264%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui,sans-serif%22 font-weight=%22800%22>S</text></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2322c55e%22/><text x=%2250%22 y=%2272%22 font-size=%2264%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22system-ui,sans-serif%22 font-weight=%22800%22>S</text></svg>">
   <style>
     :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --accent: #16a34a; --sidebar: #ffffff; }
     .dark { --bg: #0b1220; --card: #111827; --text: #e5e7eb; --muted: #94a3b8; --border: #1f2937; --accent: #22c55e; --sidebar: #0f172a; }
@@ -30,140 +30,116 @@
     table { width: 100%; border-collapse: collapse; table-layout: auto; }
     th, td { padding: 0.625rem 0.75rem; vertical-align: middle; white-space: nowrap; }
     td.description, th.description { white-space: normal; }
-    th { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
-    tr { border-bottom: 1px solid var(--border); }
-    tr:last-child { border-bottom: none; }
     .nav-link { color: var(--muted); transition: color 0.2s; display: block; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.9rem; }
     .nav-link:hover, .nav-link.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-    /* flatpickr theming */
+    .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
     .flatpickr-calendar { background: var(--card) !important; border: 1px solid var(--border) !important; color: var(--text) !important; }
     .flatpickr-day { color: var(--text) !important; }
     .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--accent) !important; border-color: var(--accent) !important; color: #fff !important; }
     .flatpickr-months .flatpickr-month, .flatpickr-weekday { color: var(--text) !important; background: var(--card) !important; }
     .flatpickr-current-month .flatpickr-monthDropdown-months, .flatpickr-current-month input.cur-year { color: var(--text) !important; }
-    .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
   </style>
 </head>
-<body class="min-h-screen antialiased flex">
-  <!-- Sidebar -->
-  <aside class="w-60 shrink-0 border-r hidden md:block" style="background: var(--sidebar); border-color: var(--border);">
-    <div class="p-5 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-2">
-        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<body class="min-h-screen antialiased">
+  <!-- Top navbar -->
+  <header class="sticky top-0 z-20 border-b" style="background: color-mix(in srgb, var(--card) 85%, transparent); backdrop-filter: blur(8px); border-color: var(--border);">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-4">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 shrink-0">
+        <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <rect width="100" height="100" rx="22" fill="#22c55e"/>
           <text x="50" y="72" font-size="64" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-weight="800">S</text>
         </svg>
-        <span class="text-xl font-bold" style="color: var(--accent);">summa</span>
+        <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
+      </a>
+      <!-- Search -->
+      <form action="/search" method="get" class="flex-1 max-w-md">
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style="color: var(--muted);"></i>
+          <input name="q" class="inp pl-9 py-2 text-sm" placeholder="Search transactions..." value="{{ q or '' }}">
+        </div>
+      </form>
+      <div class="flex items-center gap-3 shrink-0">
+        <select onchange="window.location='/set-lang?lang='+this.value" class="inp text-xs" style="width:auto; padding:0.3rem 1.8rem 0.3rem 0.6rem;">
+          {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
+        </select>
+        <button onclick="toggleTheme()" aria-label="Toggle theme"
+          class="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none shrink-0"
+          style="background: var(--border);">
+          <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-[10px]"
+                style="background: var(--accent); color: #fff;">
+            <i id="theme-icon" class="fas fa-sun"></i>
+          </span>
+        </button>
       </div>
-      <button onclick="toggleTheme()" aria-label="Toggle theme"
-        class="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none shrink-0"
-        style="background: var(--border);">
-        <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-[10px]"
-              style="background: var(--accent); color: #fff;">
-          <i id="theme-icon" class="fas fa-sun"></i>
-        </span>
-      </button>
     </div>
-    <nav class="px-3 pb-6">
-      <div class="section-title">{{ t("overview") }}</div>
-      <a href="/" class="nav-link"><i class="fas fa-chart-line mr-2 w-4"></i>{{ t("dashboard") }}</a>
-      <a href="/transactions" class="nav-link"><i class="fas fa-receipt mr-2 w-4"></i>{{ t("transactions") }}</a>
-      <a href="/budgets" class="nav-link"><i class="fas fa-wallet mr-2 w-4"></i>{{ t("budgets") }}</a>
-      <a href="/import" class="nav-link"><i class="fas fa-file-import mr-2 w-4"></i>{{ t("import") }}</a>
-      <div class="section-title">{{ t("ai") }}</div>
-      <a href="/ask" class="nav-link"><i class="fas fa-comments mr-2 w-4"></i>{{ t("ask_ai") }}</a>
-      <a href="/plan" class="nav-link"><i class="fas fa-bullseye mr-2 w-4"></i>{{ t("plan") }}</a>
-      <a href="/review" class="nav-link"><i class="fas fa-clipboard-check mr-2 w-4"></i>{{ t("review") }}</a>
-      <div class="section-title">{{ t("manage") }}</div>
-      <a href="/accounts" class="nav-link"><i class="fas fa-university mr-2 w-4"></i>{{ t("accounts") }}</a>
-      <a href="/categories" class="nav-link"><i class="fas fa-tags mr-2 w-4"></i>{{ t("categories") }}</a>
-      <a href="/memory" class="nav-link"><i class="fas fa-brain mr-2 w-4"></i>{{ t("memory") }}</a>
-      <a href="/graph" class="nav-link"><i class="fas fa-project-diagram mr-2 w-4"></i>{{ t("graph") }}</a>
-      <a href="/fx" class="nav-link"><i class="fas fa-exchange-alt mr-2 w-4"></i>{{ t("fx_rates") }}</a>
-      <div class="section-title">{{ t("tools") }}</div>
-      <a href="/usage" class="nav-link"><i class="fas fa-chart-bar mr-2 w-4"></i>{{ t("usage") }}</a>
-      <a href="/export" class="nav-link"><i class="fas fa-download mr-2 w-4"></i>{{ t("export_csv") }}</a>
-      <a href="/chart" class="nav-link"><i class="fas fa-chart-pie mr-2 w-4"></i>{{ t("chart") }}</a>
-    <div class="px-3 pb-4">
-      <select onchange="window.location='/set-lang?lang='+this.value" class="inp text-xs w-full">
-        {% for l in available_languages() %}<option value="{{ l }}" {% if l==lang %}selected{% endif %}>{{ l }}</option>{% endfor %}
-      </select>
+  </header>
+  <div class="flex min-h-[calc(100vh-57px)]">
+    <!-- Sidebar -->
+    <aside class="w-56 shrink-0 border-r hidden md:block" style="background: var(--sidebar); border-color: var(--border);">
+      <nav class="px-3 py-4">
+        <div class="section-title">{{ t("overview") }}</div>
+        <a href="/" class="nav-link"><i class="fas fa-chart-line mr-2 w-4"></i>{{ t("dashboard") }}</a>
+        <a href="/transactions" class="nav-link"><i class="fas fa-receipt mr-2 w-4"></i>{{ t("transactions") }}</a>
+        <a href="/budgets" class="nav-link"><i class="fas fa-wallet mr-2 w-4"></i>{{ t("budgets") }}</a>
+        <a href="/import" class="nav-link"><i class="fas fa-file-import mr-2 w-4"></i>{{ t("import") }}</a>
+        <div class="section-title">{{ t("ai") }}</div>
+        <a href="/ask" class="nav-link"><i class="fas fa-comments mr-2 w-4"></i>{{ t("ask_ai") }}</a>
+        <a href="/plan" class="nav-link"><i class="fas fa-bullseye mr-2 w-4"></i>{{ t("plan") }}</a>
+        <a href="/review" class="nav-link"><i class="fas fa-clipboard-check mr-2 w-4"></i>{{ t("review") }}</a>
+        <div class="section-title">{{ t("manage") }}</div>
+        <a href="/accounts" class="nav-link"><i class="fas fa-university mr-2 w-4"></i>{{ t("accounts") }}</a>
+        <a href="/categories" class="nav-link"><i class="fas fa-tags mr-2 w-4"></i>{{ t("categories") }}</a>
+        <a href="/memory" class="nav-link"><i class="fas fa-brain mr-2 w-4"></i>{{ t("memory") }}</a>
+        <a href="/graph" class="nav-link"><i class="fas fa-project-diagram mr-2 w-4"></i>{{ t("graph") }}</a>
+        <a href="/fx" class="nav-link"><i class="fas fa-exchange-alt mr-2 w-4"></i>{{ t("fx_rates") }}</a>
+        <div class="section-title">{{ t("tools") }}</div>
+        <a href="/usage" class="nav-link"><i class="fas fa-chart-bar mr-2 w-4"></i>{{ t("usage") }}</a>
+        <a href="/export" class="nav-link"><i class="fas fa-download mr-2 w-4"></i>{{ t("export_csv") }}</a>
+        <a href="/chart" class="nav-link"><i class="fas fa-chart-pie mr-2 w-4"></i>{{ t("chart") }}</a>
+      </nav>
+    </aside>
+    <!-- Mobile nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-20 border-t flex overflow-x-auto" style="background: var(--card); border-color: var(--border);">
+      <a href="/" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-chart-line"></i></a>
+      <a href="/transactions" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-receipt"></i></a>
+      <a href="/budgets" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-wallet"></i></a>
+      <a href="/ask" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-comments"></i></a>
+      <a href="/memory" class="flex-1 text-center py-2 text-xs nav-link"><i class="fas fa-brain"></i></a>
     </div>
-    </nav>
-  </aside>
-  <!-- Mobile header -->
-  <div class="md:hidden fixed top-0 left-0 right-0 z-20 border-b px-4 py-3 flex items-center justify-between" style="background: var(--card); border-color: var(--border);">
-    <div class="flex items-center gap-2">
-      <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" rx="22" fill="#22c55e"/>
-        <text x="50" y="72" font-size="64" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-weight="800">S</text>
-      </svg>
-      <span class="text-lg font-bold" style="color: var(--accent);">summa</span>
-    </div>
-    <button onclick="toggleTheme()" aria-label="Toggle theme"
-      class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
-      style="background: var(--border);">
-      <span id="theme-knob-m" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300 flex items-center justify-center text-xs"
-            style="background: var(--accent); color: #fff;">
-        <i id="theme-icon-m" class="fas fa-sun"></i>
-      </span>
-    </button>
+    <main class="flex-1 min-w-0 p-6 md:p-8 pb-20 md:pb-8">
+      <div class="max-w-5xl mx-auto">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
   </div>
-  <main class="flex-1 min-w-0 p-6 md:p-8 mt-14 md:mt-0">
-    <div class="max-w-5xl mx-auto">
-      {% block content %}{% endblock %}
-    </div>
-  </main>
-  <script>
-    const html = document.documentElement;
-    function applyTheme(t) {
-      if (t === 'dark') { html.classList.add('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-moon'); e.classList.add('fa-sun'); }); document.querySelectorAll('#theme-knob, #theme-knob-m').forEach(e=>{ e.style.transform='translateX(24px)'; }); }
-      else { html.classList.remove('dark'); document.querySelectorAll('#theme-icon, #theme-icon-m').forEach(e=>{ e.classList.remove('fa-sun'); e.classList.add('fa-moon'); }); document.querySelectorAll('#theme-knob, #theme-knob-m').forEach(e=>{ e.style.transform='translateX(0)'; }); }
-      localStorage.setItem('theme', t);
-    }
-    function toggleTheme() { applyTheme(html.classList.contains('dark') ? 'light' : 'dark'); }
-    applyTheme(localStorage.getItem('theme') || 'dark');
-  </script>
-
   <!-- Loading overlay -->
   <div id="loader" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(2px);">
     <div class="flex flex-col items-center gap-3">
       <div class="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style="border-color: var(--accent); border-top-color: transparent;"></div>
-      <div class="text-sm muted">{{ t('thinking') }}</div>
+      <div class="text-sm muted">Thinking...</div>
     </div>
   </div>
   <script>
-    // Show loader on form submit
-    document.addEventListener('submit', function(e) {
-      const f = e.target;
-      if (f && f.tagName === 'FORM') {
-        document.getElementById('loader').classList.remove('hidden');
-      }
-    });
-    // Render markdown in .md-content
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.md-content').forEach(function(el) {
-        el.innerHTML = marked.parse(el.textContent);
-      });
-    });
-  </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      if (window.flatpickr) {
-        flatpickr('input[type="date"]', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true });
-      }
-    });
-  </script>
-  <script>
-    // Format dates according to browser locale
+    const html = document.documentElement;
+    function applyTheme(t) {
+      if (t === 'dark') { html.classList.add('dark'); document.querySelectorAll('#theme-icon').forEach(e=>{ e.classList.remove('fa-moon'); e.classList.add('fa-sun'); }); document.querySelectorAll('#theme-knob').forEach(e=>{ e.style.transform='translateX(24px)'; }); }
+      else { html.classList.remove('dark'); document.querySelectorAll('#theme-icon').forEach(e=>{ e.classList.remove('fa-sun'); e.classList.add('fa-moon'); }); document.querySelectorAll('#theme-knob').forEach(e=>{ e.style.transform='translateX(0)'; }); }
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() { applyTheme(html.classList.contains('dark') ? 'light' : 'dark'); }
+    applyTheme(localStorage.getItem('theme') || 'dark');
+    document.addEventListener('submit', function(e) { const f = e.target; if (f && f.tagName === 'FORM') document.getElementById('loader').classList.remove('hidden'); });
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.fmt-date').forEach(function(el) {
         const iso = el.getAttribute('data-iso');
         if (!iso) return;
-        const d = new {{ t('date') }}(iso + 'T00:00:00');
+        const d = new Date(iso + 'T00:00:00');
         if (isNaN(d.getTime())) return;
-        try { el.textContent = d.toLocale{{ t('date') }}String(); } catch (e) {}
+        try { el.textContent = d.toLocaleDateString(); } catch (e) {}
       });
+      document.querySelectorAll('.md-content').forEach(function(el) { el.innerHTML = marked.parse(el.textContent); });
+      if (window.flatpickr) flatpickr('input[type="date"]', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y', allowInput: true });
     });
   </script>
 </body>

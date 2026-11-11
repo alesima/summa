@@ -462,6 +462,33 @@ def set_lang(lang: str, request: Request):
     return RedirectResponse(request.headers.get("referer", "/"), status_code=303)
 
 
+
+@app.get("/health")
+def health():
+    db.init()
+    try:
+        with db.db() as conn:
+            conn.execute("SELECT 1")
+        return {"status": "ok", "version": "0.1.0"}
+    except Exception as e:
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=503)
+
+
+
+@app.get("/search", response_class=HTMLResponse)
+def search_page(request: Request, q: str = ""):
+    db.init()
+    rows = []
+    if q:
+        all_txns = repo.list_transactions(limit=100000)
+        ql = q.lower()
+        rows = [t for t in all_txns if ql in (t.get("description") or "").lower()
+                or ql in (t.get("category_name") or "").lower()
+                or ql in (t.get("account_name") or "").lower()]
+    return templates.TemplateResponse(request, "search.html", _ctx(request, q=q, rows=rows, from_cents=models.from_cents))
+
+
 def run_web(host: str = "127.0.0.1", port: int = 8000):
     import uvicorn
     uvicorn.run(app, host=host, port=port)
