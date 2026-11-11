@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- All AI features now stream responses with a preloader (ChatGPT-style) and improved spacing.
+
 ### Added
 - Token usage tracking (`summa usage`) with optional cost estimate.
 - Persistent AI memory: `summa memory add/list/remove` and multi-turn chat with history.

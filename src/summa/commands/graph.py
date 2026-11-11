@@ -47,8 +47,10 @@ def register(app: typer.Typer) -> None:
     def graph_sync():
         """Auto-populate the graph from accounts, categories and transactions."""
         db.init()
-        from ..services.graph_service import sync_from_data
-        counts = sync_from_data()
+        from rich.status import Status
+        with Status("[bold cyan]Syncing graph...[/bold cyan]", console=console, spinner="dots"):
+            from ..services.graph_service import sync_from_data
+            counts = sync_from_data()
         console.print(f"[green]Graph synced:[/green] {counts['accounts']} accounts, "
                       f"{counts['merchants']} merchants, {counts['categories']} categories.")
 

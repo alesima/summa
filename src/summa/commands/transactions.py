@@ -113,7 +113,9 @@ def register(app: typer.Typer) -> None:
         if not acc:
             console.print("[red]Specify --account (there is more than one account).[/red]")
             raise typer.Exit(1)
-        parsed = importers.parse_statement(file)
+        from rich.status import Status
+        with Status("[bold cyan]Reading statement...[/bold cyan]", console=console, spinner="dots"):
+            parsed = importers.parse_statement(file)
         if not parsed:
             console.print("[red]No transactions found in file.[/red]")
             raise typer.Exit(1)
@@ -126,8 +128,10 @@ def register(app: typer.Typer) -> None:
         console.print(t)
         if dry_run:
             return
-        from ..services.import_service import import_statement
-        result = import_statement(file, account_name=acc["name"], categorize=categorize, force=force)
+        from rich.status import Status
+        with Status("[bold cyan]Importing...[/bold cyan]", console=console, spinner="dots"):
+            from ..services.import_service import import_statement
+            result = import_statement(file, account_name=acc["name"], categorize=categorize, force=force)
         if result.get("duplicate_document"):
             ex = result.get("existing", {})
             console.print(f"[yellow]This document was already imported on {ex.get('imported_at')} ({ex.get('transactions_count')} transactions). Skipping.[/yellow]")
@@ -153,8 +157,10 @@ def register(app: typer.Typer) -> None:
             return
         cats = list(dict.fromkeys([c["name"] for c in repo.list_categories()]))
         try:
-            from ..services.decision_service import categorize as decide
-            suggestions = decide(txns, cats)
+            from rich.status import Status
+            with Status("[bold cyan]Categorizing with AI...[/bold cyan]", console=console, spinner="dots"):
+                from ..services.decision_service import categorize as decide
+                suggestions = decide(txns, cats)
         except Exception as e:
             console.print(f"[red]AI error:[/red] {e}")
             raise typer.Exit(1)
